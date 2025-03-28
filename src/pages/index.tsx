@@ -12,7 +12,7 @@ const Home: FC = () => {
       <div className="products-container">
         <ProductCard />
         <ProductCard />
-        {/* Puedes agregar más ProductCard según sea necesario */}
+      
       </div>
       <Footer />
     </div>
