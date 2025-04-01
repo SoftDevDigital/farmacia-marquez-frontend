@@ -1,9 +1,12 @@
-import { FC } from 'react';
-import { AppProps } from 'next/app';
-import '../styles/globals.css';  // Importa tus estilos globales aquí si es necesario
+import { GoogleOAuthProvider } from '@react-oauth/google'; 
+import '../styles/globals.css'
 
-const MyApp: FC<AppProps> = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
-};
+function MyApp({ Component, pageProps }) {
+  return (
+    <GoogleOAuthProvider clientId="19606759169-ji6emksanp398buiodeuu477fum0li4u.apps.googleusercontent.com">
+      <Component {...pageProps} />
+    </GoogleOAuthProvider>
+  )
+}
 
 export default MyApp;

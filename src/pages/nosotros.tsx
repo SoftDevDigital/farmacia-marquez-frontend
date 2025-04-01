@@ -1,40 +1,40 @@
 import Footer from '@/components/Footer';
-import Header from '../components/Header'; // Adjust the path to your Header component
+import Header from '../components/Header';
 
 const Nosotros = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
+    
       <Header />
 
-      {/* Main Content Container */}
+    
       <div className="w-full max-w-7xl mx-auto py-8 px-4">
-        {/* Title */}
+       
         <h1 className="text-3xl font-bold mb-8">Nosotros</h1>
 
-        {/* Illustration */}
+     
         <div className="bg-gray-100 rounded-lg p-8 mb-8 flex justify-center">
           <img
-            src="/farmacia-zentner-illustration.jpg" // Placeholder path for the illustration
+            src="/farmacia-zentner-illustration.jpg" 
             alt="Farmacia Zentner Illustration"
             className="max-w-full h-auto"
             style={{ maxHeight: '300px' }}
           />
         </div>
 
-        {/* Tagline */}
+       
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Nuestra prioridad, tu bienestar
         </h2>
 
-        {/* Main Description */}
+       
         <p className="text-gray-600 mb-8">
           En el corazón de Santa Fe, en la esquina de San Jerónimo y Suipacha, nos encontramos desde hace más de 70 años, comprometidos con tu salud y bienestar.
         </p>
 
-        {/* Subsections */}
+     
         <div className="space-y-8">
-          {/* Líderes en Dermocosmética */}
+      
           <div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               Líderes en Dermocosmética
@@ -44,7 +44,7 @@ const Nosotros = () => {
             </p>
           </div>
 
-          {/* Accesibilidad e Innovación */}
+         
           <div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               Accesibilidad e Innovación
@@ -54,7 +54,7 @@ const Nosotros = () => {
             </p>
           </div>
 
-          {/* Tu Salud, Nuestra Prioridad */}
+         
           <div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               Tu Salud, Nuestra Prioridad

@@ -1,51 +1,66 @@
-import { FC } from 'react';
-import Header from '../components/Header'; 
+import { FC, useEffect, useState } from 'react';
+import axios from 'axios';
+import Header from '../components/Header';
 import Footer from '@/components/Footer';
 
-
 const Marcas: FC = () => {
+  const [categories, setCategories] = useState<any[]>([]); 
+  const [brands, setBrands] = useState<any[]>([]); 
+  const [products, setProducts] = useState<any[]>([]); 
+  const [selectedCategory, setSelectedCategory] = useState<string>(''); 
+  const [selectedBrand, setSelectedBrand] = useState<string>(''); 
+  const [priceFrom, setPriceFrom] = useState<number>(0); 
+  const [priceTo, setPriceTo] = useState<number>(999999); 
+  const [error, setError] = useState(''); 
 
-  const products = [
-    {
-      id: 1,
-      name: 'Nutrilon Profutura 3 800 gr',
-      price: 20697.00,
-      discount: 40,
-      installment: { price: 6899.00, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 2,
-      name: 'PerPiel Humectación Profunda Emulsión 40...',
-      price: 11691.36,
-      discount: 20,
-      installment: { price: 3897.12, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 3,
-      name: 'Dermaglós Solar FPS 50 250 ml',
-      price: 18693.07,
-      discount: 30,
-      installment: { price: 6231.02, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 4,
-      name: 'Dermaglós Crema Gel Ultra Hidratante 50 gr',
-      price: 17683.11,
-      discount: 25,
-      installment: { price: 5894.37, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 5,
-      name: 'Curitas Tela Elástica 8 Unidades',
-      price: 9000.00,
-      installment: { price: 3000.00, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-  ];
+  
+  useEffect(() => {
+    const fetchCategoriesAndProductsAndBrands = async () => {
+      try {
+        const categoryResponse = await axios.get('http://localhost:3000/categories');
+        const productResponse = await axios.get('http://localhost:3000/products');
+        const brandResponse = await axios.get('http://localhost:3000/brands');
+        
+        setCategories(categoryResponse.data);
+        setProducts(productResponse.data);
+        setBrands(brandResponse.data);
+      } catch (error) {
+        setError('Error al cargar las categorías, productos o marcas');
+      }
+    };
+
+    fetchCategoriesAndProductsAndBrands();
+  }, []);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+    setSelectedBrand('');
+  };
+
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBrand(e.target.value);
+  };
+
+  const handlePriceChange = () => {
+    const from = parseFloat((document.getElementById('priceFrom') as HTMLInputElement).value) || 0;
+    const to = parseFloat((document.getElementById('priceTo') as HTMLInputElement).value) || 999999;
+    setPriceFrom(from);
+    setPriceTo(to);
+  };
+
+  
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
+    const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
+    const matchesPrice =
+      product.price >= priceFrom && product.price <= priceTo; 
+
+    return matchesCategory && matchesBrand && matchesPrice;
+  });
+
+  const filteredBrands = brands.filter((brand) => {
+    return true; 
+  });
 
   return (
     <div>
@@ -54,33 +69,46 @@ const Marcas: FC = () => {
         
         <aside className="sidebar">
           <h2>Categorías</h2>
-          <select className="filter-select">
+          <select className="filter-select" onChange={handleCategoryChange}>
             <option>Categorías</option>
-            <option>Bebés</option>
-            <option>Cuidado Personal</option>
-            <option>Salud</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.name}
+              </option>
+            ))}
           </select>
-
-          
 
           <h3>Marca</h3>
-          <select className="filter-select">
+          <select className="filter-select" onChange={handleBrandChange} value={selectedBrand}>
             <option>Marca</option>
-            <option>Nutrilon</option>
-            <option>PerPiel</option>
-            <option>Dermaglós</option>
-            <option>Curitas</option>
+            {filteredBrands.map((brand) => (
+              <option key={brand._id} value={brand._id}>
+                {brand.name}
+              </option>
+            ))}
           </select>
 
-          <h3>Precio</h3>
+          <h3>Filtrar por</h3>
+          <h4>Precio</h4>
           <div className="price-filter">
-            <input type="number" placeholder="Desde" defaultValue={900} />
-            <input type="number" placeholder="Hasta" defaultValue={66670} />
-            <button className="apply-button">Aplicar</button>
+            <input 
+              id="priceFrom" 
+              type="number" 
+              placeholder="Desde" 
+              defaultValue={900} 
+              onChange={handlePriceChange} 
+            />
+            <input 
+              id="priceTo" 
+              type="number" 
+              placeholder="Hasta" 
+              defaultValue={66670} 
+              onChange={handlePriceChange} 
+            />
+            <button className="apply-button" onClick={handlePriceChange}>Aplicar</button>
           </div>
         </aside>
 
-       
         <main className="product-grid">
           <div className="grid-header">
             <h1>Marcas</h1>
@@ -90,12 +118,12 @@ const Marcas: FC = () => {
           </div>
 
           <div className="products">
-            {products.map((product) => (
-              <div key={product.id} className="product-card">
+            {filteredProducts.map((product) => (
+              <div key={product._id} className="product-card">
                 {product.discount && (
                   <span className="discount-badge">{product.discount}% OFF</span>
                 )}
-                <img src={product.image} alt={product.name} className="product-image" />
+                <img src={product.imageUrl} alt={product.name} className="product-image" />
                 <h3 className="product-name">{product.name}</h3>
                 <p className="product-price">${product.price.toLocaleString('es-AR')}</p>
                 {product.installment && (
@@ -108,7 +136,7 @@ const Marcas: FC = () => {
           </div>
         </main>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };

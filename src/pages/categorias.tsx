@@ -1,80 +1,68 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Footer from '@/components/Footer';
 
 const Categories: FC = () => {
+  const [categories, setCategories] = useState<any[]>([]); 
+  const [selectedCategory, setSelectedCategory] = useState<string>(''); 
+  const [selectedBrand, setSelectedBrand] = useState<string>(''); 
+  const [error, setError] = useState('');
 
-  const products = [
-    {
-      id: 1,
-      name: 'Nutrilon Profutura 3 800 gr',
-      price: 20697.00,
-      discount: 40,
-      installment: { price: 6899.00, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 2,
-      name: 'PerPiel Humectación Profunda Emulsión 40...',
-      price: 11691.36,
-      discount: 20,
-      installment: { price: 3897.12, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 3,
-      name: 'Dermaglós Solar FPS 50 250 ml',
-      price: 18693.07,
-      discount: 30,
-      installment: { price: 6231.02, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 4,
-      name: 'Dermaglós Crema Gel Ultra Hidratante 50 gr',
-      price: 17683.11,
-      discount: 25,
-      installment: { price: 5894.37, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 5,
-      name: 'Curitas Tela Elástica 8 Unidades',
-      price: 9000.00,
-      installment: { price: 3000.00, count: 3 },
-      image: 'https://via.placeholder.com/150',
-    },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/categories'); 
+        setCategories(response.data);
+      } catch (error) {
+        setError('Error al cargar las categorías');
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value); 
+  };
+
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBrand(e.target.value); 
+  };
 
   return (
     <div>
       <Header />
       <div className="categories-page">
-     
         <aside className="sidebar">
           <h2>Categorías</h2>
-          <select className="filter-select">
-            <option>Categorías</option>
-            <option>Bebés</option>
-            <option>Cuidado Personal</option>
-            <option>Salud</option>
+          <select className="filter-select" onChange={handleCategoryChange} value={selectedCategory}>
+            <option value="">Selecciona una categoría</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
           </select>
 
-          
-
           <h3>Marca</h3>
-          <select className="filter-select">
-            <option>Marca</option>
-            <option>Nutrilon</option>
-            <option>PerPiel</option>
-            <option>Dermaglós</option>
-            <option>Curitas</option>
+          <select className="filter-select" onChange={handleBrandChange} value={selectedBrand}>
+            <option value="">Selecciona una marca</option>
+            {categories
+              .filter((category) => selectedCategory === '' || category.name === selectedCategory) // Filtra las categorías si se seleccionó alguna
+              .map((category) => 
+                category.marcas && category.marcas.map((brand: any) => (
+                  <option key={brand._id} value={brand.name}>
+                    {brand.name}
+                  </option>
+                ))
+              )}
           </select>
 
           <h3>Precio</h3>
           <div className="price-filter">
-            <input type="number" placeholder="Desde" defaultValue={900} />
-            <input type="number" placeholder="Hasta" defaultValue={66670} />
+            <input type="number" placeholder="Desde" />
+            <input type="number" placeholder="Hasta" />
             <button className="apply-button">Aplicar</button>
           </div>
         </aside>
@@ -88,25 +76,37 @@ const Categories: FC = () => {
           </div>
 
           <div className="products">
-            {products.map((product) => (
-              <div key={product.id} className="product-card">
-                {product.discount && (
-                  <span className="discount-badge">{product.discount}% OFF</span>
-                )}
-                <img src={product.image} alt={product.name} className="product-image" />
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-price">${product.price.toLocaleString('es-AR')}</p>
-                {product.installment && (
-                  <p className="installment">
-                    3 x ${product.installment.price.toLocaleString('es-AR')} sin interés
-                  </p>
-                )}
-              </div>
-            ))}
+            {categories
+              .filter((category) => {
+            
+                if (selectedCategory === '' || selectedCategory === category.name) {
+                  return true;
+                }
+                return false;
+              })
+              .map((category) => (
+                <div key={category._id} className="product-card">
+                  <h3 className="product-name">{category.name}</h3>
+                  <p>Marcas:</p>
+                  <ul>
+                    {category.marcas && category.marcas
+                      .filter((brand: any) => selectedBrand === '' || brand.name === selectedBrand) 
+                      .map((brand: any, index: number) => (
+                        <li key={index}>{brand.name}</li>
+                      ))}
+                  </ul>
+                  <p>Subcategorías:</p>
+                  <ul>
+                    {category.subcategories.map((subcategory: any, index: number) => (
+                      <li key={index}>{subcategory.name}</li> 
+                    ))}
+                  </ul>
+                </div>
+              ))}
           </div>
         </main>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };
