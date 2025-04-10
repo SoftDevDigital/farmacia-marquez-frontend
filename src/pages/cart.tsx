@@ -203,9 +203,9 @@ const CartPage: FC = () => {
         }
       );
     
-      if (shippingResponse.status === 200) {
+      if (shippingResponse.status === 200 || shippingResponse.status === 201) {
         const paymentResponse = await axios.post(
-          'http://localhost:3000/cart/checkout',
+          'http://localhost:3000/payments/checkout',
           {},
           {
             headers: {
@@ -214,7 +214,7 @@ const CartPage: FC = () => {
           }
         );
     
-        if (paymentResponse.status === 201 && paymentResponse.data.init_point) {
+        if (paymentResponse.data.init_point) {
           // Redirigir al usuario a Mercado Pago
           window.location.href = paymentResponse.data.init_point;
         } else {
