@@ -11,7 +11,7 @@ const Home: FC = () => {
       <PromoBanner />
       <div className="products-container">
         <ProductCard />
-        <ProductCard />
+      
       
       </div>
       <Footer />

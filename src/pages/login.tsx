@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import axios from 'axios';  
+import axios from 'axios';
+import jwt_decode from 'jwt-decode';
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
-import { GoogleLogin } from '@react-oauth/google';  
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,41 +14,30 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false); 
   const router = useRouter();
 
-
-  const handleGoogleLogin = async (response: any) => {
-    try {
-      const googleToken = response.credential;
-      const res = await axios.post('http://localhost:3000/auth/google', {
-        token: googleToken,
-      });
-
-      if (res.data && res.data.accessToken) {
-        localStorage.setItem('USER_TOKEN', res.data.accessToken);  
-        router.push('/'); 
-      }
-    } catch (err) {
-      setError('Error al iniciar sesión con Google');  
-      console.error(err);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email && password) {
       try {
-        
         const response = await axios.post('http://localhost:3000/auth/login', {
           email: email,
           password: password,
         });
 
-        
         if (response.data && response.data.accessToken) {
-          localStorage.setItem('USER_TOKEN', response.data.accessToken);  
-          router.push('/'); 
+          localStorage.setItem('USER_TOKEN', response.data.accessToken);
+
+          // Decode the token and check the role
+          const decodedToken = jwt_decode(response.data.accessToken) as { role: string };
+
+          // If the user is an admin, redirect them to the create-product page
+          if (decodedToken.role === 'ADMIN') {
+            router.push('/');
+          } else {
+            router.push('/');  // Redirect to homepage for non-admin users
+          }
         }
       } catch (err) {
-        setError('Error al iniciar sesión');  
+        setError('Error al iniciar sesión');
         console.error(err);
       }
     } else {
@@ -55,14 +45,52 @@ const Login = () => {
     }
   };
 
+
+  // Función de inicio de sesión con Google
+  
+  const handleGoogleLogin = () => {
+    const width = 500;
+    const height = 600;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    // Abre el popup para el login con Google
+    const popup = window.open(
+      'http://localhost:3000/auth/google',
+      'google_login',
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+  
+    // Escucha los mensajes desde el popup
+    const handleMessage = (event) => {
+      if (event.origin !== 'http://localhost:3000') return; // Verificar la fuente
+    
+      const { accessToken, error } = event.data;
+    
+      if (accessToken) {
+        localStorage.setItem('USER_TOKEN', accessToken); // Guardar el token
+        popup.close(); // Cerrar la ventana emergente
+        router.push('/'); // Redirigir al inicio
+      } else if (error) {
+        setError('Error al iniciar sesión con Google');
+        popup.close(); // Cerrar la ventana si hay un error
+      }
+    };
+  
+    // Agregar el listener para escuchar los mensajes del popup
+    window.addEventListener('message', handleMessage);
+  
+    // Asegúrate de remover el listener al desmontar el componente para evitar memory leaks
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  };
+
   return (
     <div className="login-page">
-      
       <Header />
-
       <div className="login-container">
         <div className="login-form">
-          
           <h2 className="login-title">Iniciá sesión</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -120,14 +148,13 @@ const Login = () => {
           </form>
 
           <div className="google-login">
-            <GoogleLogin
-              onSuccess={handleGoogleLogin}
-              onError={(error) => console.log('Login Failed:', error)}
-            />
-          </div>
+  <button onClick={handleGoogleLogin} className="google-login-button">
+    Iniciar sesión con Google
+  </button>
+</div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

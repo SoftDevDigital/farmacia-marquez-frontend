@@ -1,7 +1,30 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-
+import jwt_decode from 'jwt-decode'; // Importación correcta
+import { useRouter } from 'next/router'; 
 const Header = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (token) {
+      try {
+        // Decodificar el token
+        const decodedToken = jwt_decode(token) as { role: string };
+        if (decodedToken?.role === 'ADMIN') {
+          setIsAdmin(true); // Si el rol es ADMIN, mostramos la opción de crear productos
+        } else {
+          setIsAdmin(false); // Si no es ADMIN, ocultamos la opción
+        }
+      } catch (error) {
+        console.error('Error al verificar el rol:', error);
+        setIsAdmin(false); // Si hay error al decodificar, no permitir acceso
+      }
+    } else {
+      setIsAdmin(false); // Si no hay token, no mostramos la opción
+    }
+  }, []); // El efecto solo se ejecuta al montar el componente
+
   return (
     <header className="header">
       <div className="header-top">
@@ -32,10 +55,15 @@ const Header = () => {
       <nav className="header-nav">
         <ul className="nav-list">
           <li><Link href="/">Inicio</Link></li>
-          <li><Link href="/productos">Productos</Link></li>
+           {/* <li><Link href="/productos">Productos</Link></li>  */}
           <li><Link href="/categorias">Categorías</Link></li>
           <li><Link href="/marcas">Marcas</Link></li>
+          <li><Link href="/PromotionsPage">Promociones</Link></li>
           <li><Link href="/nosotros">Nosotros</Link></li>
+          {isAdmin && (
+            <li><Link href="/affiliates">Afiliados</Link></li>
+          )}
+          
         </ul>
       </nav>
     </header>
@@ -43,4 +71,3 @@ const Header = () => {
 };
 
 export default Header;
-

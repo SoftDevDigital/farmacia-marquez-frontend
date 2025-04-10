@@ -1214,3 +1214,147 @@
 .tiendanube img {
   height: 16px;
 }
+
+/*google-count*/
+
+.google-login-button {
+  background-color: #4285F4; /* Color de Google */
+  color: white; /* Color de texto */
+  border: none; /* Sin bordes */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 12px 20px; /* Espaciado interno */
+  font-size: 16px; /* Tamaño de fuente */
+  width: 100%; /* Ancho completo */
+  cursor: pointer; /* Cursor de mano */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease; /* Animación suave */
+}
+
+.google-login-button:hover {
+  background-color: #357AE8; /* Cambiar color al pasar el mouse */
+}
+
+.google-login-button:focus {
+  outline: none; /* Quitar borde al hacer click */
+}
+
+/*Reset password*/
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #fff;
+  padding: 20px;
+}
+
+.resetPasswordPage {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+.description {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.label {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  border-color: #00a79d;
+}
+
+.button {
+  background-color: #00a79d;
+  color: #fff;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #008c83;
+}
+
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.message {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.errorMessage {
+  font-size: 1rem;
+  color: #d32f2f;
+  text-align: center;
+}
+
+/*category*/
+select {
+  padding: 10px;
+  margin: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #f5f5f5;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+/*Promocion*/
+

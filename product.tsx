@@ -9,7 +9,7 @@ const Products: FC = () => {
   const [brands, setBrands] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [selectedBrand, setSelectedBrand] = useState<string>(''); 
   const [priceFrom, setPriceFrom] = useState<number>(0);
   const [priceTo, setPriceTo] = useState<number>(0);
   const [error, setError] = useState('');
@@ -67,16 +67,64 @@ const Products: FC = () => {
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
     const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
-  
-    // Asegúrate de que los valores de priceFrom y priceTo no sean 0, y que los valores ingresados sean correctos
     const matchesPrice =
-      (priceFrom > 0 ? product.price >= priceFrom : true) &&
-      (priceTo > 0 ? product.price <= priceTo : true);
-  
+      (priceFrom === 0 || product.price >= priceFrom) &&
+      (priceTo === 0 || product.price <= priceTo);
+
     return matchesCategory && matchesBrand && matchesPrice;
   });
 
   const filteredBrands = brands.filter((brand) => true);
+
+  // Función para agregar un producto al carrito
+  const handleAddToCart = async (productId: string, quantity: number) => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) {
+      setError('No estás autenticado');
+      return;
+    }
+
+    const product = products.find((product) => product._id === productId);
+    if (!product) {
+      setError('Producto no encontrado');
+      return;
+    }
+
+    // Validar que el precio y la cantidad sean correctos
+    const price = product.price; // Tomar el precio del producto
+    if (!price || quantity <= 0) {
+      setError('Por favor, selecciona un producto y una cantidad válida.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/cart/add',
+        {
+          productId, 
+          quantity, 
+          price,
+          applyDiscount: false // Asumiendo que no se aplica descuento por defecto
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        alert('Producto agregado al carrito');
+      } else {
+        alert('Hubo un problema al agregar el producto al carrito');
+      }
+    } catch (error) {
+      console.error(error);
+      setError('Error al agregar el producto al carrito');
+      alert('Hubo un error al agregar el producto al carrito');
+    }
+  };
 
   // Crear producto
   const handleCreateProduct = async (e: React.FormEvent) => {
@@ -87,7 +135,6 @@ const Products: FC = () => {
       setError('No estás autenticado');
       return;
     }
-
 
     try {
       const res = await axios.post(
@@ -124,8 +171,6 @@ const Products: FC = () => {
       alert('Error al crear el producto');
     }
   };
-
-
 
   // Editar producto
   const handleEditProduct = (productId: string) => {
@@ -193,54 +238,6 @@ const Products: FC = () => {
       alert('Error al actualizar el producto');
     }
   };
-  const handleAddToCart = async (productId: string, quantity: number) => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      setError('No estás autenticado');
-      return;
-    }
-
-    const product = products.find((product) => product._id === productId);
-    if (!product) {
-      setError('Producto no encontrado');
-      return;
-    }
-
-    // Validar que el precio y la cantidad sean correctos
-    const price = product.price; // Tomar el precio del producto
-    if (!price || quantity <= 0) {
-      setError('Por favor, selecciona un producto y una cantidad válida.');
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        'http://localhost:3000/cart/add',
-        {
-          productId, 
-          quantity, 
-          price,
-          applyDiscount: false // Asumiendo que no se aplica descuento por defecto
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        alert('Producto agregado al carrito');
-      } else {
-        alert('Hubo un problema al agregar el producto al carrito');
-      }
-    } catch (error) {
-      console.error(error);
-      setError('Error al agregar el producto al carrito');
-      alert('Hubo un error al agregar el producto al carrito');
-    }
-  };
 
   // Eliminar producto
   const handleDeleteProduct = async (productId: string) => {
@@ -290,24 +287,22 @@ const Products: FC = () => {
           </select>
 
           <h3>Filtrar por</h3>
-<h4>Precio (Desde y Hasta)</h4>
-<div className="price-filter">
-  <label>Desde</label>
-  <input
-    type="number"
-    placeholder="Precio desde"
-    value={priceFrom}
-    onChange={(e) => setPriceFrom(Number(e.target.value))}
-  />
-  <label>Hasta</label>
-  <input
-    type="number"
-    placeholder="Precio hasta"
-    value={priceTo}
-    onChange={(e) => setPriceTo(Number(e.target.value))}
-  />
-  <button className="apply-button">→</button>
-</div>
+          <h4>Precio</h4>
+          <div className="price-filter">
+            <input
+              type="number"
+              placeholder="Desde"
+              value={priceFrom}
+              onChange={(e) => setPriceFrom(Number(e.target.value))}
+            />
+            <input
+              type="number"
+              placeholder="Hasta"
+              value={priceTo}
+              onChange={(e) => setPriceTo(Number(e.target.value))}
+            />
+            <button className="apply-button">→</button>
+          </div>
         </aside>
 
         <main className="product-grid">
@@ -335,7 +330,8 @@ const Products: FC = () => {
                     <button onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
                   </>
                 )}
-                 <button
+                {/* Botón para agregar al carrito */}
+                <button
                   onClick={() => handleAddToCart(product._id, 1)} // Llamada a la función para agregar al carrito
                 >
                   Comprar
@@ -344,114 +340,6 @@ const Products: FC = () => {
             ))}
           </div>
         </main>
-
-        {isAdmin && (
-          <div className="create-product-form">
-            <h3>{editingProduct ? 'Editar Producto' : 'Crear Producto'}</h3>
-            <form onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}>
-              <input
-                type="text"
-                name="name"
-                value={productData.name}
-                onChange={(e) => setProductData({ ...productData, name: e.target.value })}
-                placeholder="Nombre del producto"
-                required
-              />
-              <textarea
-                name="description"
-                value={productData.description}
-                onChange={(e) => setProductData({ ...productData, description: e.target.value })}
-                placeholder="Descripción"
-              />
-              <input
-                type="number"
-                name="price"
-                value={productData.price}
-                onChange={(e) => setProductData({ ...productData, price: Number(e.target.value) })}
-                placeholder="Precio"
-                required
-              />
-              <input
-                type="number"
-                name="stock"
-                value={productData.stock}
-                onChange={(e) => setProductData({ ...productData, stock: Number(e.target.value) })}
-                placeholder="Stock"
-                required
-              />
-              <input
-                type="number"
-                name="discount"
-                value={productData.discount}
-                onChange={(e) => setProductData({ ...productData, discount: Number(e.target.value) })}
-                placeholder="Descuento (%)"
-              />
-              <input
-                type="text"
-                name="imageUrl"
-                value={productData.imageUrl}
-                onChange={(e) => setProductData({ ...productData, imageUrl: e.target.value })}
-                placeholder="URL de la imagen"
-              />
-              <select
-                name="categoryId"
-                value={productData.categoryId}
-                onChange={(e) => setProductData({ ...productData, categoryId: e.target.value })}
-                required
-              >
-                <option value="">Seleccionar Categoría</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                name="subcategoryId"
-                value={productData.subcategoryId}
-                onChange={(e) => setProductData({ ...productData, subcategoryId: e.target.value })}
-              >
-                <option value="">Seleccionar Subcategoría</option>
-                {categories
-                  .filter((category) => category._id === productData.categoryId)
-                  .map((category) =>
-                    category.subcategories.map((subcategory: any) => (
-                      <option key={subcategory._id} value={subcategory._id}>
-                        {subcategory.name}
-                      </option>
-                    ))
-                  )}
-              </select>
-
-              <select
-                name="brandId"
-                value={productData.brandId}
-                onChange={(e) => setProductData({ ...productData, brandId: e.target.value })}
-                required
-              >
-                <option value="">Seleccionar Marca</option>
-                {brands.map((brand) => (
-                  <option key={brand._id} value={brand._id}>
-                    {brand.name}
-                  </option>
-                ))}
-              </select>
-
-              <label>
-                Producto Destacado
-                <input
-                  type="checkbox"
-                  name="isFeatured"
-                  checked={productData.isFeatured}
-                  onChange={(e) => setProductData({ ...productData, isFeatured: e.target.checked })}
-                />
-              </label>
-
-              <button type="submit">{editingProduct ? 'Actualizar Producto' : 'Crear Producto'}</button>
-            </form>
-          </div>
-        )}
       </div>
       <Footer />
     </div>

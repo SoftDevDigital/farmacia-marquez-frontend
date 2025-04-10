@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
+import jwt_decode from 'jwt-decode';  // Para verificar el rol
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
 
@@ -11,9 +12,28 @@ const Marcas: FC = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>(''); 
   const [priceFrom, setPriceFrom] = useState<number>(0); 
   const [priceTo, setPriceTo] = useState<number>(999999); 
-  const [error, setError] = useState(''); 
+  const [error, setError] = useState('');
+  const [brandName, setBrandName] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<string | null>(null); // Estado para la marca en edición
 
-  
+  // Verificar si el usuario tiene rol ADMIN
+  useEffect(() => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) {
+      return;
+    }
+    try {
+      const decodedToken = jwt_decode(token) as { role: string };
+      if (decodedToken.role === 'ADMIN') {
+        setIsAdmin(true); // Si el rol es ADMIN, habilitar la creación, eliminación y edición de marcas
+      }
+    } catch (err) {
+      console.error('Error al verificar el rol', err);
+    }
+  }, []);
+
+  // Fetch categories, products, and brands from API
   useEffect(() => {
     const fetchCategoriesAndProductsAndBrands = async () => {
       try {
@@ -32,23 +52,109 @@ const Marcas: FC = () => {
     fetchCategoriesAndProductsAndBrands();
   }, []);
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCategory(e.target.value);
-    setSelectedBrand('');
+  // Eliminar marca
+  const handleDelete = async (brandId: string) => {
+    const token = localStorage.getItem('USER_TOKEN');
+    try {
+      const res = await axios.delete(`http://localhost:3000/brands/${brandId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 200) {
+        alert('Marca eliminada con éxito');
+        setBrands(brands.filter((brand) => brand._id !== brandId));
+      } else {
+        alert('Hubo un problema al eliminar la marca');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error al eliminar la marca');
+    }
   };
 
-  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBrand(e.target.value);
+  // Crear marca
+  const handleCreateBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) {
+      setError('No estás autenticado');
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        'http://localhost:3000/brands',
+        { name: brandName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (res.status === 201) {
+        alert('Marca creada con éxito');
+        setBrands([...brands, res.data]); // Agregar la nueva marca al estado
+        setBrandName(''); // Limpiar el campo de entrada
+      } else {
+        alert('Hubo un problema al crear la marca');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error al crear la marca');
+    }
   };
 
-  const handlePriceChange = () => {
-    const from = parseFloat((document.getElementById('priceFrom') as HTMLInputElement).value) || 0;
-    const to = parseFloat((document.getElementById('priceTo') as HTMLInputElement).value) || 999999;
-    setPriceFrom(from);
-    setPriceTo(to);
+  // Editar marca
+  const handleEdit = (brandId: string) => {
+    const brand = brands.find((brand) => brand._id === brandId);
+    if (brand) {
+      setBrandName(brand.name); // Setear el nombre de la marca en el formulario
+      setEditingBrand(brandId); // Establecer el estado de la marca en edición
+    }
   };
 
-  
+  // Actualizar marca
+  const handleUpdateBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBrand) return;
+
+    const token = localStorage.getItem('USER_TOKEN');
+    try {
+      const res = await axios.patch(
+        `http://localhost:3000/brands/${editingBrand}`,
+        { name: brandName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (res.status === 200) {
+        alert('Marca actualizada con éxito');
+        setBrands(
+          brands.map((brand) =>
+            brand._id === editingBrand ? res.data : brand
+          )
+        );
+        setBrandName(''); // Limpiar el campo de entrada
+        setEditingBrand(null); // Resetear el estado de edición
+      } else {
+        alert('Hubo un problema al actualizar la marca');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error al actualizar la marca');
+    }
+  };
+
+  // Filtrado de productos
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
     const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
@@ -68,8 +174,19 @@ const Marcas: FC = () => {
       <div className="categories-page">
         
         <aside className="sidebar">
+
+        <h3>Marca</h3>
+          <select className="filter-select" onChange={(e) => setSelectedBrand(e.target.value)} value={selectedBrand}>
+            <option>Marca</option>
+            {filteredBrands.map((brand) => (
+              <option key={brand._id} value={brand._id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+          
           <h2>Categorías</h2>
-          <select className="filter-select" onChange={handleCategoryChange}>
+          <select className="filter-select" onChange={(e) => setSelectedCategory(e.target.value)}>
             <option>Categorías</option>
             {categories.map((category) => (
               <option key={category._id} value={category._id}>
@@ -78,15 +195,7 @@ const Marcas: FC = () => {
             ))}
           </select>
 
-          <h3>Marca</h3>
-          <select className="filter-select" onChange={handleBrandChange} value={selectedBrand}>
-            <option>Marca</option>
-            {filteredBrands.map((brand) => (
-              <option key={brand._id} value={brand._id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
+         
 
           <h3>Filtrar por</h3>
           <h4>Precio</h4>
@@ -96,16 +205,16 @@ const Marcas: FC = () => {
               type="number" 
               placeholder="Desde" 
               defaultValue={900} 
-              onChange={handlePriceChange} 
+              onChange={(e) => setPriceFrom(parseFloat(e.target.value))}
             />
             <input 
               id="priceTo" 
               type="number" 
               placeholder="Hasta" 
               defaultValue={66670} 
-              onChange={handlePriceChange} 
+              onChange={(e) => setPriceTo(parseFloat(e.target.value))}
             />
-            <button className="apply-button" onClick={handlePriceChange}>Aplicar</button>
+            <button className="apply-button">Aplicar</button>
           </div>
         </aside>
 
@@ -135,6 +244,41 @@ const Marcas: FC = () => {
             ))}
           </div>
         </main>
+
+        {isAdmin && (
+          <div className="create-brand-form">
+            <h3>{editingBrand ? 'Editar Marca' : 'Crear Marca'}</h3>
+            <form onSubmit={editingBrand ? handleUpdateBrand : handleCreateBrand}>
+              <input
+                type="text"
+                name="name"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                placeholder="Nombre de la marca"
+                required
+              />
+              <button type="submit">{editingBrand ? 'Actualizar Marca' : 'Crear Marca'}</button>
+            </form>
+          </div>
+        )}
+
+        <div className="brand-list">
+          {brands.length > 0 ? (
+            brands.map((brand) => (
+              <div key={brand._id} className="brand-card">
+                <h3>{brand.name}</h3>
+                {isAdmin && (
+                  <div>
+                    <button onClick={() => handleEdit(brand._id)}>Editar Marca</button>
+                    <button onClick={() => handleDelete(brand._id)}>Eliminar Marca</button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No hay marcas disponibles.</p>
+          )}
+        </div>
       </div>
       <Footer />
     </div>

@@ -23,9 +23,10 @@ const Footer = () => {
           <h3>Menú</h3>
           <ul>
             <li><Link href="/">Inicio</Link></li>
-            <li><Link href="/productos">Productos</Link></li>
+            {/* <li><Link href="/productos">Productos</Link></li> */}
             <li><Link href="/categorias">Categorías</Link></li>
             <li><Link href="/marcas">Marcas</Link></li>
+            <li><Link href="/PromotionsPage">Promociones</Link></li>
             <li><Link href="/nosotros">Nosotros</Link></li>
           </ul>
         </div>

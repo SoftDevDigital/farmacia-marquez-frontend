@@ -3,7 +3,7 @@ import { FC } from 'react';
 const PromoBanner: FC = () => {
   return (
     <div className="promo-banner">
-      <p>¡Envíos gratis a todo el país a partir de $100.000!</p>
+      <p>¡Envíos por todo Santa Fe!</p>
     </div>
   );
 };
