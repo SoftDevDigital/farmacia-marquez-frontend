@@ -7,23 +7,23 @@ const OrdersPage = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem('USER_TOKEN');  // Obtener el token de localStorage
+      const token = localStorage.getItem('USER_TOKEN');  
 
       try {
         const response = await axios.get('http://localhost:3000/orders', {
           headers: {
-            Authorization: `Bearer ${token}`  // Pasar el token en la cabecera
+            Authorization: `Bearer ${token}`  
           }
         });
-        setOrders(response.data);  // Establecer los pedidos en el estado
+        setOrders(response.data);  
       } catch (err) {
         setError('Error al cargar los pedidos');
         console.error(err);
       }
     };
 
-    fetchOrders();  // Llamar a la función para obtener los pedidos
-  }, []);  // Solo ejecutamos cuando el componente se monta
+    fetchOrders();  
+  }, []);  
 
   return (
     <div>

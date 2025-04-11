@@ -48,7 +48,8 @@ const CartPage: FC = () => {
 
                 return {
                   ...item,
-                  product: product || {}, // Añadir los detalles del producto
+                  price: item.price ?? product.price, // importante: asegura el precio
+                  product: product || {},
                 };
               } catch (error) {
                 console.error('Error al obtener el producto:', error);
@@ -255,7 +256,9 @@ const CartPage: FC = () => {
                         />
                         <div className="cart-item-info">
                           <h3>{product.name}</h3>
-                          <p>PRECIO: ${item.price}</p>
+                          <p>Precio unitario: ${item.price}</p>
+<p>Cantidad: {item.quantity}</p>
+<p>Total del producto: ${item.price * item.quantity}</p>
                           <div>
                             <label>Cantidad: </label>
                             <input
@@ -280,7 +283,13 @@ const CartPage: FC = () => {
               })
             )}
           </div>
+          
         )}
+        {cart?.total !== undefined && (
+  <div className="cart-total">
+    <h3>Total del carrito: ${cart.total}</h3>
+  </div>
+)}
         {/* Botón para mostrar el formulario de envío */}
         {!showShippingForm && <button onClick={handleShowShippingForm}>Iniciar Proceso de Pago</button>}
         {showShippingForm && (
