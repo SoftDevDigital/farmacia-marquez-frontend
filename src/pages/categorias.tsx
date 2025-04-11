@@ -9,6 +9,7 @@ const Categories: FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
+  const [products, setProducts] = useState<any[]>([]); 
   const [categoryData, setCategoryData] = useState({
     name: '',
     subcategories: [{ name: '' }],
@@ -46,6 +47,42 @@ const Categories: FC = () => {
     };
     fetchCategories();
   }, []);
+
+  // Cargar todos los productos al principio
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/products'); // Obtiene todos los productos
+      setProducts(response.data); // Establece los productos sin filtrar
+    } catch (error) {
+      setError('Error al cargar los productos');
+    }
+  };
+  
+  fetchProducts();
+}, []); // Solo se ejecuta una vez cuando el componente se monta
+
+// Filtrado de productos cuando cambian la categoría o subcategoría
+useEffect(() => {
+  const fetchFilteredProducts = async () => {
+    if (!selectedCategory) return; // No filtrar si no hay categoría seleccionada
+
+    // Crear la URL para la API según los filtros seleccionados
+    const url = selectedSubcategory
+    ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
+    : `http://localhost:3000/products?categoryId=${selectedCategory}`;
+
+    try {
+      const response = await axios.get(url); // Llamada a la API con los filtros
+      setProducts(response.data); // Establece los productos filtrados
+    } catch (error) {
+      setError('Error al cargar los productos filtrados');
+    }
+  };
+
+  fetchFilteredProducts();
+}, [selectedCategory, selectedSubcategory]); 
+
 
   // Manejar cambio de categoría seleccionada
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -96,6 +133,41 @@ const Categories: FC = () => {
     }
   };
 
+
+  const handleAddToCart = async (productId: string) => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) {
+      alert('No estás autenticado');
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/cart/add',
+        {
+          productId,
+          quantity: 1,
+          applyDiscount: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      if (response.status === 201) {
+        alert('Producto agregado al carrito');
+      } else {
+        alert('Hubo un problema al agregar el producto');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error al agregar el producto al carrito');
+    }
+  };
+
   return (
     <div>
       <Header />
@@ -135,9 +207,7 @@ const Categories: FC = () => {
                   ))}
             </select>
           </div>
-          <button onClick={handleFilter} className="apply-button">
-            Aplicar
-          </button>
+        
 
           {/* Formulario para crear categoría (visible solo para admins) */}
           {isAdmin && (
@@ -183,29 +253,37 @@ const Categories: FC = () => {
           )}
         </div>
 
-        {/* Lista de categorías */}
         <div className="product-grid">
-          <h2 className="grid-header">Categorías</h2>
+          <h2 className="grid-header">Productos</h2>
           {error && <p className="error-message">{error}</p>}
           <div className="category-list">
-            {categories.length > 0 ? (
-              categories.map((category) => (
-                <div key={category._id} className="product-card">
-                  <h3 className="product-name">{category.name}</h3>
-                  <ul className="category-list">
-                    {category.subcategories.map((subcategory: any, index: number) => (
-                      <li key={index} className="installment">
-                        {subcategory.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            {products.length > 0 ? (
+              products.map((product) => (
+                <div key={product._id} className="product-card">
+                <img
+                  src={product.imageUrl || '/default-image.jpg'}
+                  alt={product.name}
+                  className="product-image"
+                />
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-description">{product.description}</p>
+                <p className="product-price">Precio: ${product.price}</p>
+                <p className="product-stock">Stock: {product.stock}</p>
+                {product.discount && (
+                  <div className="discount-tag">{product.discount}% OFF</div>
+                )}
+                <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
+              </div>
+              
               ))
             ) : (
-              <p className="installment">No hay categorías disponibles.</p>
+              <p>No hay productos disponibles en esta categoría.</p>
             )}
           </div>
-        </div>
+
+          </div>
+       
+      
       </div>
       <Footer />
     </div>

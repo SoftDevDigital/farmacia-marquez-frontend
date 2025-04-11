@@ -3,7 +3,7 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';  // Importa jwt-decode
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
-
+import { useRouter } from 'next/router';
 const Products: FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -13,6 +13,8 @@ const Products: FC = () => {
   const [priceFrom, setPriceFrom] = useState<number>(0);
   const [priceTo, setPriceTo] = useState<number>(0);
   const [error, setError] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState(''); 
   const [productData, setProductData] = useState({
     name: '',
     description: '',
@@ -65,6 +67,7 @@ const Products: FC = () => {
 
   // Filtrar productos por categoría, marca y precio
   const filteredProducts = products.filter((product) => {
+  
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
     const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
   
@@ -264,9 +267,23 @@ const Products: FC = () => {
     }
   };
 
+
+  useEffect(() => {
+    const filtered = products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [searchTerm, products]); // Vuelve a filtrar cuando el término de búsqueda cambia
+
+  // Manejar la búsqueda en tiempo real
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);  // Actualizar el término de búsqueda
+  };
+
+
   return (
     <div>
-      <Header />
+    <Header onSearch={handleSearch} />
       <div className="products-page">
         <aside className="sidebar">
           <h2>Categorías</h2>
@@ -437,6 +454,20 @@ const Products: FC = () => {
                   </option>
                 ))}
               </select>
+              <div className="products">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <div key={product._id} className="product-card">
+                  <h3 className="product-name">{product.name}</h3>
+                  <p>{product.description}</p>
+                  <p>${product.price}</p>
+                  {/* Otros detalles como imagen, descuento, etc. */}
+                </div>
+              ))
+            ) : (
+              <p>No se encontraron productos para "{searchTerm}"</p>
+            )}
+          </div>
 
               <label>
                 Producto Destacado

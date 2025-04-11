@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import jwt_decode from 'jwt-decode'; // Importación correcta
-import { useRouter } from 'next/router'; 
-const Header = () => {
+import jwt_decode from 'jwt-decode';
+import { useRouter } from 'next/router';
+
+const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');  
 
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -12,18 +14,22 @@ const Header = () => {
         // Decodificar el token
         const decodedToken = jwt_decode(token) as { role: string };
         if (decodedToken?.role === 'ADMIN') {
-          setIsAdmin(true); // Si el rol es ADMIN, mostramos la opción de crear productos
+          setIsAdmin(true); 
         } else {
-          setIsAdmin(false); // Si no es ADMIN, ocultamos la opción
+          setIsAdmin(false); 
         }
       } catch (error) {
         console.error('Error al verificar el rol:', error);
-        setIsAdmin(false); // Si hay error al decodificar, no permitir acceso
+        setIsAdmin(false);
       }
     } else {
-      setIsAdmin(false); // Si no hay token, no mostramos la opción
+      setIsAdmin(false); 
     }
-  }, []); // El efecto solo se ejecuta al montar el componente
+  }, []);
+
+  const handleSearch = () => {
+    onSearch(searchTerm);  // Pasamos el término de búsqueda al componente padre
+  };
 
   return (
     <header className="header">
@@ -33,10 +39,15 @@ const Header = () => {
           <span className="logo-text">Farmacia Curva Roces</span>
         </div>
 
-        {/* Barra de búsqueda */}
         <div className="search-bar">
-          <input type="text" placeholder="¿Qué estás buscando?" className="search-input" />
-          <button className="search-button">
+          <input
+            type="text"
+            placeholder="¿Qué estás buscando?"
+            className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="search-button" onClick={handleSearch}>
             <span role="img" aria-label="search">🔍</span>
           </button>
         </div>
@@ -47,7 +58,7 @@ const Header = () => {
 
           <Link href="/cart" className="cart">
             <span role="img" aria-label="cart">🛒</span>
-            <span className="cart-count">0</span> {/* Esto debería actualizarse con la cantidad real de items en el carrito */}
+            <span className="cart-count">0</span>
           </Link>
         </div>
       </div>
@@ -55,7 +66,6 @@ const Header = () => {
       <nav className="header-nav">
         <ul className="nav-list">
           <li><Link href="/">Inicio</Link></li>
-           {/* <li><Link href="/productos">Productos</Link></li>  */}
           <li><Link href="/categorias">Categorías</Link></li>
           <li><Link href="/marcas">Marcas</Link></li>
           <li><Link href="/PromotionsPage">Promociones</Link></li>
@@ -63,7 +73,6 @@ const Header = () => {
           {isAdmin && (
             <li><Link href="/affiliates">Afiliados</Link></li>
           )}
-          
         </ul>
       </nav>
     </header>

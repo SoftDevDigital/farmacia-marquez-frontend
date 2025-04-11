@@ -320,22 +320,25 @@ const Products: FC = () => {
           </div>
 
           <div className="products">
-            {filteredProducts.map((product) => (
-              <div key={product._id} className="product-card">
-                {product.discount && <span className="discount-badge">{product.discount}% OFF</span>}
-                <img src={product.imageUrl} alt={product.name} className="product-image" />
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-price">${product.price.toLocaleString('es-AR')}</p>
-                {product.installment && (
-                  <p className="installment">3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}</p>
-                )}
+  {filteredProducts.map((product) => (
+    <div key={product._id} className="product-card">
+      {product.discount && <span className="discount-badge">{product.discount}% OFF</span>}
+      <img src={product.imageUrl} alt={product.name} className="product-image" />
+      <h3 className="product-name">{product.name}</h3>
+      <p className="product-description">{product.description}</p>
+      <p className="product-price">Precio: ${product.price.toLocaleString('es-AR')}</p>
+      <p className="product-stock">Stock: {product.stock}</p>
+      {product.installment && (
+        <p className="installment">3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}</p>
+      )}
                 {isAdmin && (
                   <>
-                    <button onClick={() => handleEditProduct(product._id)}>Editar</button>
-                    <button onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
+                    <button className="btn btn-buy" onClick={() => handleEditProduct(product._id)}>Editar</button>
+                    <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
                   </>
                 )}
                  <button
+                 className="btn btn-buy"
                   onClick={() => handleAddToCart(product._id, 1)} // Llamada a la función para agregar al carrito
                 >
                   Comprar
@@ -345,7 +348,9 @@ const Products: FC = () => {
           </div>
         </main>
 
-        {isAdmin && (
+        
+      </div>
+      {isAdmin && (
           <div className="create-product-form">
             <h3>{editingProduct ? 'Editar Producto' : 'Crear Producto'}</h3>
             <form onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}>
@@ -363,29 +368,43 @@ const Products: FC = () => {
                 onChange={(e) => setProductData({ ...productData, description: e.target.value })}
                 placeholder="Descripción"
               />
-              <input
-                type="number"
-                name="price"
-                value={productData.price}
-                onChange={(e) => setProductData({ ...productData, price: Number(e.target.value) })}
-                placeholder="Precio"
-                required
-              />
-              <input
-                type="number"
-                name="stock"
-                value={productData.stock}
-                onChange={(e) => setProductData({ ...productData, stock: Number(e.target.value) })}
-                placeholder="Stock"
-                required
-              />
-              <input
-                type="number"
-                name="discount"
-                value={productData.discount}
-                onChange={(e) => setProductData({ ...productData, discount: Number(e.target.value) })}
-                placeholder="Descuento (%)"
-              />
+             <div className="form-group">
+  <label htmlFor="price">Precio</label>
+  <input
+    type="number"
+    id="price"
+    name="price"
+    value={productData.price}
+    onChange={(e) => setProductData({ ...productData, price: Number(e.target.value) })}
+    placeholder="Precio"
+    required
+  />
+</div>
+
+<div className="form-group">
+  <label htmlFor="stock">Stock</label>
+  <input
+    type="number"
+    id="stock"
+    name="stock"
+    value={productData.stock}
+    onChange={(e) => setProductData({ ...productData, stock: Number(e.target.value) })}
+    placeholder="Cantidad disponible"
+    required
+  />
+</div>
+
+<div className="form-group">
+  <label htmlFor="discount">Descuento (%)</label>
+  <input
+    type="number"
+    id="discount"
+    name="discount"
+    value={productData.discount}
+    onChange={(e) => setProductData({ ...productData, discount: Number(e.target.value) })}
+    placeholder="Ej: 10"
+  />
+</div>
               <input
                 type="text"
                 name="imageUrl"
@@ -452,8 +471,6 @@ const Products: FC = () => {
             </form>
           </div>
         )}
-      </div>
-      
     </div>
   );
 };
