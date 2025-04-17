@@ -134,6 +134,8 @@
 .sidebar {
   width: 250px;
   padding: 20px;
+  margin-bottom: 156px;
+
   border-right: 1px solid #e0e0e0;
 }
 
@@ -186,6 +188,15 @@
 /* Product Grid Styles */
 .product-grid {
   flex: 1;
+}
+
+
+.product-buttons {
+  display: flex;
+  flex-direction: column; /* o 'row' si preferís alinearlos horizontalmente */
+  gap: 8px;
+  align-items: center; /* centrado horizontal */
+  margin-top: 12px;
 }
 
 .grid-header {
@@ -377,9 +388,9 @@
 }
 
 .category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
 }
 
 .category-list li {
@@ -1484,4 +1495,114 @@ button:hover {
 
 .btn-buy:hover {
   background-color: #0d9488;
+}
+
+
+/*Orders*/
+
+.orders-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+.order-card {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.order-card h3 {
+  font-size: 18px;
+  color: #14b8a6;
+  margin-bottom: 10px;
+}
+
+.order-status, .order-total {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.item-list {
+  padding-left: 20px;
+}
+
+.item {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+/*Informacion de envios*/
+
+.shipping-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.shipping-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.shipping-form .form-group label {
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: #333;
+}
+
+.shipping-form .form-group input,
+.shipping-form .form-group textarea {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.shipping-form .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.shipping-form .form-group.full-width {
+  grid-column: span 2;
+}
+
+.shipping-form {
+  transition: all 0.3s ease;
+}
+
+.toggle-shipping-button {
+  margin-top: 12px;
+  display: inline-block;
+}
+
+.brand-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.brand-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.create-category-box {
+  margin-top: 30px;
+  background-color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }

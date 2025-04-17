@@ -118,9 +118,11 @@ const Login = () => {
                   required
                 />
                 <button
+                
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
+                  className="password-toggle btn btn-buy"
+                  
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>

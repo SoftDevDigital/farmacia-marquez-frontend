@@ -376,7 +376,7 @@ const AffiliatesPage = () => {
                   required
                 />
               </div>
-              <button type="submit">Actualizar Afiliado</button>
+              <button class="btn btn-buy" type="submit">Actualizar Afiliado</button>
             </form>
           </div>
         )}
@@ -389,8 +389,8 @@ const AffiliatesPage = () => {
                 <p>Email: {affiliate.email}</p>
                 <p>Teléfono: {affiliate.phoneNumber}</p>
                 <p>Dirección: {affiliate.address.street}, {affiliate.address.city}</p>
-                <button onClick={() => handleEditAffiliate(affiliate._id)}>Editar</button>
-                <button onClick={() => handleDeleteAffiliate(affiliate._id)}>Eliminar</button>
+                <button class="btn btn-buy" onClick={() => handleEditAffiliate(affiliate._id)}>Editar</button>
+                <button class="btn btn-buy" onClick={() => handleDeleteAffiliate(affiliate._id)}>Eliminar</button>
               </div>
             ))}
           </div>

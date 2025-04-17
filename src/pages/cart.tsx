@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
+import { useCart } from '@/context/CartContext';
 const CartPage: FC = () => {
   const [cart, setCart] = useState<any>(null); // Estado para el carrito
   const [error, setError] = useState<string>(''); // Estado para manejar errores
@@ -21,7 +21,7 @@ const CartPage: FC = () => {
     additionalNotes: ''
   });
   const [showShippingForm, setShowShippingForm] = useState(false); // Estado para mostrar el formulario de envío
-
+  const { fetchCartCount } = useCart();
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -127,14 +127,17 @@ const CartPage: FC = () => {
     const updatedCart = { ...cart };
     updatedCart.items = updatedCart.items.filter((item: any) => item.productId !== productId);
     setCart(updatedCart);
-
+  
     try {
       const response = await axios.delete(`http://localhost:3000/cart/remove/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      if (response.status === 200) {
+        
+        await fetchCartCount(); // ✅ ACTUALIZA el contador
+      }
       if (response.status === 200) {
         alert('Producto eliminado del carrito');
       } else {
@@ -256,9 +259,9 @@ const CartPage: FC = () => {
                         />
                         <div className="cart-item-info">
                           <h3>{product.name}</h3>
-                          <p>Precio unitario: ${item.price}</p>
+                          <p>Precio unitario: ${product.discountedPrice ?? item.price}</p>
 <p>Cantidad: {item.quantity}</p>
-<p>Total del producto: ${item.price * item.quantity}</p>
+<p>Total del producto: ${item.finalPrice !== undefined ? item.finalPrice : (item.price * item.quantity)}</p>
                           <div>
                             <label>Cantidad: </label>
                             <input
@@ -270,7 +273,7 @@ const CartPage: FC = () => {
                               }
                             />
                           </div>
-                          <button onClick={() => handleRemoveItem(item.productId)}>
+                          <button className="btn btn-buy" onClick={() => handleRemoveItem(item.productId)}>
                             Eliminar
                           </button>
                         </div>
@@ -291,121 +294,59 @@ const CartPage: FC = () => {
   </div>
 )}
         {/* Botón para mostrar el formulario de envío */}
-        {!showShippingForm && <button onClick={handleShowShippingForm}>Iniciar Proceso de Pago</button>}
+        <button className="toggle-shipping-button btn btn-buy" onClick={() => setShowShippingForm(!showShippingForm)}>
+  {showShippingForm ? 'Ocultar Información de Envío' : 'Iniciar Proceso de Pago'}
+</button>
         {showShippingForm && (
           <>
             <h2>Información de Envío</h2>
-            <form>
-              <label>
-                Nombre:
-                <input
-                  type="text"
-                  name="recipientName"
-                  value={shippingInfo.recipientName}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Teléfono:
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={shippingInfo.phoneNumber}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Documento:
-                <input
-                  type="text"
-                  name="documentNumber"
-                  value={shippingInfo.documentNumber}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Dirección:
-                <input
-                  type="text"
-                  name="street"
-                  value={shippingInfo.street}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Número:
-                <input
-                  type="text"
-                  name="streetNumber"
-                  value={shippingInfo.streetNumber}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Departamento:
-                <input
-                  type="text"
-                  name="apartment"
-                  value={shippingInfo.apartment}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Ciudad:
-                <input
-                  type="text"
-                  name="city"
-                  value={shippingInfo.city}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Provincia:
-                <input
-                  type="text"
-                  name="state"
-                  value={shippingInfo.state}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Código Postal:
-                <input
-                  type="text"
-                  name="postalCode"
-                  value={shippingInfo.postalCode}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                País:
-                <input
-                  type="text"
-                  name="country"
-                  value={shippingInfo.country}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Notas adicionales:
-                <textarea
-                  name="additionalNotes"
-                  value={shippingInfo.additionalNotes}
-                  onChange={handleChange}
-                />
-              </label>
-            </form>
-            <button onClick={handleCheckout}>Confirmar Información y Pagar</button>
+            <form className="shipping-form">
+  <div className="form-group">
+    <label htmlFor="recipientName">Nombre:</label>
+    <input type="text" id="recipientName" name="recipientName" value={shippingInfo.recipientName} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="phoneNumber">Teléfono:</label>
+    <input type="text" id="phoneNumber" name="phoneNumber" value={shippingInfo.phoneNumber} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="documentNumber">Documento:</label>
+    <input type="text" id="documentNumber" name="documentNumber" value={shippingInfo.documentNumber} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="street">Dirección:</label>
+    <input type="text" id="street" name="street" value={shippingInfo.street} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="streetNumber">Número:</label>
+    <input type="text" id="streetNumber" name="streetNumber" value={shippingInfo.streetNumber} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="apartment">Departamento:</label>
+    <input type="text" id="apartment" name="apartment" value={shippingInfo.apartment} onChange={handleChange} />
+  </div>
+  <div className="form-group">
+    <label htmlFor="city">Ciudad:</label>
+    <input type="text" id="city" name="city" value={shippingInfo.city} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="state">Provincia:</label>
+    <input type="text" id="state" name="state" value={shippingInfo.state} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="postalCode">Código Postal:</label>
+    <input type="text" id="postalCode" name="postalCode" value={shippingInfo.postalCode} onChange={handleChange} required />
+  </div>
+  <div className="form-group">
+    <label htmlFor="country">País:</label>
+    <input type="text" id="country" name="country" value={shippingInfo.country} onChange={handleChange} required />
+  </div>
+  <div className="form-group full-width">
+    <label htmlFor="additionalNotes">Notas adicionales:</label>
+    <textarea id="additionalNotes" name="additionalNotes" value={shippingInfo.additionalNotes} onChange={handleChange} />
+  </div>
+</form>
+            <button className="btn btn-buy" onClick={handleCheckout}>Confirmar Información y Pagar</button>
           </>
         )}
       </div>

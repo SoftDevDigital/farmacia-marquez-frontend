@@ -267,7 +267,20 @@ useEffect(() => {
                 />
                 <h3 className="product-name">{product.name}</h3>
                 <p className="product-description">{product.description}</p>
-                <p className="product-price">Precio: ${product.price}</p>
+                {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+  <p className="product-price">
+    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+      ${product.price.toLocaleString('es-AR')}
+    </span>
+    <span style={{ fontWeight: 'bold', color: 'green' }}>
+      ${product.discountedPrice.toLocaleString('es-AR')}
+    </span>
+  </p>
+) : (
+  <p className="product-price">
+    ${product.price.toLocaleString('es-AR')}
+  </p>
+)}
                 <p className="product-stock">Stock: {product.stock}</p>
                 {product.discount && (
                   <div className="discount-tag">{product.discount}% OFF</div>

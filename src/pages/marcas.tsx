@@ -10,7 +10,7 @@ const Marcas: FC = () => {
   const [products, setProducts] = useState<any[]>([]); 
   const [selectedCategory, setSelectedCategory] = useState<string>(''); 
   const [selectedBrand, setSelectedBrand] = useState<string>(''); 
-  const [priceFrom, setPriceFrom] = useState<number>(0); 
+  const [priceFrom, setPriceFrom] = useState<string>(''); 
   const [priceTo, setPriceTo] = useState<number>(999999); 
   const [error, setError] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -158,8 +158,8 @@ const Marcas: FC = () => {
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
     const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
-    const matchesPrice =
-      product.price >= priceFrom && product.price <= priceTo; 
+    const from = parseFloat(priceFrom || '0');
+const matchesPrice = product.price >= from && product.price <= priceTo;
 
     return matchesCategory && matchesBrand && matchesPrice;
   });
@@ -234,21 +234,19 @@ const Marcas: FC = () => {
           <h3>Filtrar por</h3>
           <h4>Precio</h4>
           <div className="price-filter">
-            <input 
-              id="priceFrom" 
-              type="number" 
-              placeholder="Desde" 
-              defaultValue={0} 
-              onChange={(e) => setPriceFrom(parseFloat(e.target.value))}
-            />
-            <input 
-              id="priceTo" 
-              type="number" 
-              placeholder="Hasta" 
-              defaultValue={0} 
-              onChange={(e) => setPriceTo(parseFloat(e.target.value))}
-            />
-            <button className="apply-button">Aplicar</button>
+          <label>Desde</label>
+          <input 
+  id="priceFrom" 
+  type="number" 
+  placeholder="Desde"
+  value={priceFrom}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) setPriceFrom(value); // Solo permite números positivos
+  }}
+/>
+           
+            
           </div>
         </aside>
 
@@ -263,14 +261,30 @@ const Marcas: FC = () => {
           <div className="products">
           {filteredProducts.map((product) => (
   <div key={product._id} className="product-card">
-    {product.discount && (
-      <span className="discount-badge">{product.discount}% OFF</span>
-    )}
+   
     <img src={product.imageUrl || '/default-image.jpg'} alt={product.name} className="product-image" />
     <h3 className="product-name">{product.name}</h3>
     <p className="product-description">{product.description}</p>
-    <p className="product-price">Precio: ${product.price}</p>
+    {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+  <p className="product-price">
+    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+      ${product.price.toLocaleString('es-AR')}
+    </span>
+    <span style={{ fontWeight: 'bold', color: 'green' }}>
+      ${product.discountedPrice.toLocaleString('es-AR')}
+    </span>
+  </p>
+) : (
+  <p className="product-price">
+    ${product.price.toLocaleString('es-AR')}
+  </p>
+)}
+
     <p className="product-stock">Stock: {product.stock}</p>
+
+    {product.discount && product.discountedPrice < product.price && (
+  <div className="discount-tag">{product.discount}% OFF</div>
+)}
     <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
   </div>
 ))}
@@ -282,7 +296,7 @@ const Marcas: FC = () => {
          {isAdmin && (
           <div className="create-brand-form">
             <h3>{editingBrand ? 'Editar Marca' : 'Crear Marca'}</h3>
-            <form onSubmit={editingBrand ? handleUpdateBrand : handleCreateBrand}>
+            <form onSubmit={editingBrand ? handleUpdateBrand : handleCreateBrand} className="brand-form">
               <input
                 type="text"
                 name="name"
@@ -302,7 +316,7 @@ const Marcas: FC = () => {
               <div key={brand._id} className="brand-card">
                 <h3>{brand.name}</h3>
                 {isAdmin && (
-                  <div>
+                  <div className="brand-buttons">
                     <button className="btn btn-edit" onClick={() => handleEdit(brand._id)}>Editar Marca</button>
                     <button  className="btn btn-delete" onClick={() => handleDelete(brand._id)}>Eliminar Marca</button>
                   </div>

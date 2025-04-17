@@ -3,22 +3,25 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';  // Importa jwt-decode
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
+import { useCart } from '@/context/CartContext';
+
 
 const Products: FC = () => {
+  const { fetchCartCount } = useCart(); 
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedBrand, setSelectedBrand] = useState<string>('');
-  const [priceFrom, setPriceFrom] = useState<number>(0);
+  const [priceFrom, setPriceFrom] = useState<string>('');
   const [priceTo, setPriceTo] = useState<number>(0);
   const [error, setError] = useState('');
   const [productData, setProductData] = useState({
     name: '',
     description: '',
-    price: 0,
-    discount: 0,
-    stock: 0,
+    price: '',         // ← antes era 0
+    discount: '',      // ← opcional también
+    stock: '',         // ← antes era 0
     imageUrl: '',
     categoryId: '',
     subcategoryId: '',
@@ -50,6 +53,7 @@ const Products: FC = () => {
       try {
         const categoryResponse = await axios.get('http://localhost:3000/categories');
         const productResponse = await axios.get('http://localhost:3000/products');
+        console.log('prodcutos',productResponse);
         const brandResponse = await axios.get('http://localhost:3000/brands');
 
         setCategories(categoryResponse.data);
@@ -70,8 +74,8 @@ const Products: FC = () => {
   
     // Asegúrate de que los valores de priceFrom y priceTo no sean 0, y que los valores ingresados sean correctos
     const matchesPrice =
-      (priceFrom > 0 ? product.price >= priceFrom : true) &&
-      (priceTo > 0 ? product.price <= priceTo : true);
+  (priceFrom !== '' ? product.price >= parseInt(priceFrom) : true) &&
+  (priceTo > 0 ? product.price <= priceTo : true);
   
     return matchesCategory && matchesBrand && matchesPrice;
   });
@@ -81,40 +85,43 @@ const Products: FC = () => {
   // Crear producto
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
       setError('No estás autenticado');
       return;
     }
-
-
+  
+    const preparedProduct = {
+      ...productData,
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      discount: Number(productData.discount) || 0,
+    };
+  
     try {
-      const res = await axios.post(
-        'http://localhost:3000/products',
-        productData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      const res = await axios.post('http://localhost:3000/products', preparedProduct, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
       if (res.status === 201) {
         alert('Producto creado con éxito');
-        setProducts([...products, res.data]); // Agregar el nuevo producto a la lista
+        setProducts((prevProducts) => [...prevProducts, res.data]);
+  
         setProductData({
           name: '',
           description: '',
-          price: 0,
-          discount: 0,
-          stock: 0,
+          price: '',
+          discount: '',
+          stock: '',
           imageUrl: '',
           categoryId: '',
           subcategoryId: '',
           brandId: '',
-          isFeatured: false,
+          isFeatured: false
         });
       } else {
         alert('Hubo un problema al crear el producto');
@@ -153,10 +160,16 @@ const Products: FC = () => {
     if (!editingProduct) return;
 
     const token = localStorage.getItem('USER_TOKEN');
+    const preparedProduct = {
+      ...productData,
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      discount: Number(productData.discount) || 0,
+    };
     try {
       const res = await axios.patch(
         `http://localhost:3000/products/${editingProduct}`,
-        productData,
+        preparedProduct,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -199,28 +212,55 @@ const Products: FC = () => {
       setError('No estás autenticado');
       return;
     }
-
+  
     const product = products.find((product) => product._id === productId);
     if (!product) {
       setError('Producto no encontrado');
       return;
     }
-
-    // Validar que el precio y la cantidad sean correctos
-    const price = product.price; // Tomar el precio del producto
-    if (!price || quantity <= 0) {
-      setError('Por favor, selecciona un producto y una cantidad válida.');
-      return;
+  
+    const price = product.price;
+  
+    // Si el producto tiene promoción tipo NXN, se duplica la cantidad
+    let finalQuantity = quantity;
+    let totalPrice = product.price * quantity; // Por defecto
+    
+    if (product.appliedPromotion?.type === 'NXN') {
+      const buyQty = product.appliedPromotion.buyQuantity || 1;
+      const getQty = product.appliedPromotion.getQuantity || 1;
+      const fullGroups = Math.floor(quantity / buyQty);
+      const remaining = quantity % buyQty;
+    
+      finalQuantity = fullGroups * (buyQty + getQty) + remaining;
+      totalPrice = fullGroups * buyQty * product.price + remaining * product.price;
     }
+    
 
+    if (product.appliedPromotion && product.promotionType === 'PERCENT_SECOND') {
+      if (quantity >= 2) {
+        const pairs = Math.floor(quantity / 2);
+        const remaining = quantity % 2;
+    
+        const fullPriceUnits = pairs; // primeros productos
+        const discountedUnits = pairs; // segundos productos con descuento
+        const extraUnits = remaining; // unidades sueltas sin aplicar promo
+    
+        const discount = product.appliedPromotion.discountPercentage || 0;
+        const discountedPrice = product.price * (1 - discount / 100);
+    
+        totalPrice = (fullPriceUnits * product.price) + (discountedUnits * discountedPrice) + (extraUnits * product.price);
+      } else {
+        totalPrice = product.price * quantity;
+      }
+    }
     try {
       const response = await axios.post(
         'http://localhost:3000/cart/add',
         {
-          productId, 
-          quantity, 
-          price,
-          applyDiscount: false // Asumiendo que no se aplica descuento por defecto
+          productId,
+          quantity: finalQuantity,      // 2 unidades visibles
+          finalPrice: totalPrice,       // pero solo se paga 1 si es 2x1
+          applyDiscount: true
         },
         {
           headers: {
@@ -229,7 +269,7 @@ const Products: FC = () => {
           },
         }
       );
-
+      await fetchCartCount();
       if (response.status === 201) {
         alert('Producto agregado al carrito');
       } else {
@@ -290,23 +330,26 @@ const Products: FC = () => {
           </select>
 
           <h3>Filtrar por</h3>
-<h4>Precio (Desde y Hasta)</h4>
+<h4>Precio</h4>
 <div className="price-filter">
   <label>Desde</label>
   <input
-    type="number"
-    placeholder="Precio desde"
-    value={priceFrom}
-    onChange={(e) => setPriceFrom(Number(e.target.value))}
-  />
-  <label>Hasta</label>
+  type="number"
+  placeholder="Precio desde"
+  value={priceFrom}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) setPriceFrom(value);
+  }}
+/>
+  {/* <label>Hasta</label>
   <input
     type="number"
     placeholder="Precio hasta"
     value={priceTo}
     onChange={(e) => setPriceTo(Number(e.target.value))}
-  />
-  <button className="apply-button">→</button>
+  /> */}
+  
 </div>
         </aside>
 
@@ -322,17 +365,36 @@ const Products: FC = () => {
           <div className="products">
   {filteredProducts.map((product) => (
     <div key={product._id} className="product-card">
-      {product.discount && <span className="discount-badge">{product.discount}% OFF</span>}
+      
       <img src={product.imageUrl} alt={product.name} className="product-image" />
       <h3 className="product-name">{product.name}</h3>
       <p className="product-description">{product.description}</p>
-      <p className="product-price">Precio: ${product.price.toLocaleString('es-AR')}</p>
+      {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+  <p className="product-price">
+    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+      ${product.price.toLocaleString('es-AR')}
+    </span>
+    <span style={{ fontWeight: 'bold', color: 'green' }}>
+      ${product.discountedPrice.toLocaleString('es-AR')}
+    </span>
+  </p>
+) : (
+  <p className="product-price">
+    ${product.price.toLocaleString('es-AR')}
+  </p>
+)}
       <p className="product-stock">Stock: {product.stock}</p>
+      {product.discount && product.discountedPrice < product.price && (
+      <div className="discount-tag">{product.discount}% OFF</div>
+    )}
       {product.installment && (
         <p className="installment">3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}</p>
       )}
+      <div className="product-buttons">
+
                 {isAdmin && (
                   <>
+                  
                     <button className="btn btn-buy" onClick={() => handleEditProduct(product._id)}>Editar</button>
                     <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
                   </>
@@ -343,6 +405,7 @@ const Products: FC = () => {
                 >
                   Comprar
                 </button>
+                </div>
               </div>
             ))}
           </div>
@@ -371,40 +434,40 @@ const Products: FC = () => {
              <div className="form-group">
   <label htmlFor="price">Precio</label>
   <input
-    type="number"
-    id="price"
-    name="price"
-    value={productData.price}
-    onChange={(e) => setProductData({ ...productData, price: Number(e.target.value) })}
-    placeholder="Precio"
-    required
-  />
+  type="number"
+  id="price"
+  name="price"
+  value={productData.price}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setProductData({ ...productData, price: value });
+    }
+  }}
+  placeholder="Precio"
+  required
+/>
 </div>
 
 <div className="form-group">
   <label htmlFor="stock">Stock</label>
   <input
-    type="number"
-    id="stock"
-    name="stock"
-    value={productData.stock}
-    onChange={(e) => setProductData({ ...productData, stock: Number(e.target.value) })}
-    placeholder="Cantidad disponible"
-    required
-  />
+  type="number"
+  id="stock"
+  name="stock"
+  value={productData.stock}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setProductData({ ...productData, stock: value });
+    }
+  }}
+  placeholder="Cantidad disponible"
+  required
+/>
 </div>
 
-<div className="form-group">
-  <label htmlFor="discount">Descuento (%)</label>
-  <input
-    type="number"
-    id="discount"
-    name="discount"
-    value={productData.discount}
-    onChange={(e) => setProductData({ ...productData, discount: Number(e.target.value) })}
-    placeholder="Ej: 10"
-  />
-</div>
+
               <input
                 type="text"
                 name="imageUrl"

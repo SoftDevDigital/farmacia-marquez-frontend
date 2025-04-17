@@ -13,7 +13,7 @@ const PromotionsPage = () => {
     _id: '', 
     title: '',
     description: '',
-    discountPercentage: 0,
+    discountPercentage: '',
     startDate: '',
     endDate: '',
     productIds: [], 
@@ -96,11 +96,39 @@ const PromotionsPage = () => {
       alert('No estás autenticado');
       return;
     }
-
+  
+    // Crear un objeto limpio según el tipo
+    const preparedPromotion: any = {
+      title: promotionData.title,
+      description: promotionData.description,
+      startDate: promotionData.startDate,
+      endDate: promotionData.endDate,
+      productIds: promotionData.productIds,
+      type: promotionData.type,
+      isActive: promotionData.isActive,
+    };
+  
+    // Agregar solo el campo correcto según el tipo
+    switch (promotionData.type) {
+      case 'PERCENTAGE':
+        preparedPromotion.discountPercentage = Number(promotionData.discountPercentage) || 0;
+        break;
+      case 'FIXED':
+        preparedPromotion.discountAmount = Number(promotionData.discountAmount) || 0;
+        break;
+      case 'PERCENT_SECOND':
+        preparedPromotion.discountPercentage = Number(promotionData.discountPercentageSecond) || 0;
+        break;
+      case 'NXN':
+        preparedPromotion.buyQuantity = Number(promotionData.buyQuantity) || 0;
+        preparedPromotion.getQuantity = Number(promotionData.getQuantity) || 0;
+        break;
+    }
+  
     try {
       const response = await axios.post(
         'http://localhost:3000/promotions',
-        promotionData,
+        preparedPromotion,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,22 +136,20 @@ const PromotionsPage = () => {
           },
         }
       );
-
+  
       if (response.status === 201) {
         alert('Promoción creada con éxito');
-        setPromotions([...promotions, response.data]); 
+        setPromotions([...promotions, response.data]);
         setPromotionData({
           _id: '',
           title: '',
           description: '',
-          discountPercentage: 0,
-          buyQuantity: 0, 
-          getQuantity: 0, 
+          discountPercentage: '',
           startDate: '',
           endDate: '',
           productIds: [],
+          type: 'PERCENTAGE',
           isActive: true,
-          type: 'PERCENTAGE', 
         });
       } else {
         alert('Hubo un problema al crear la promoción');
@@ -252,14 +278,16 @@ const PromotionsPage = () => {
         <p>Válida del {promotion.startDate} al {promotion.endDate}</p>
         
         {isAdmin && (
+          <div className="promotion-buttons">
           <>
-            <button onClick={() => handleEditPromotion(promotion._id)}>Editar</button>
-            <button onClick={() => handleDeletePromotion(promotion._id)}>Eliminar</button>
+            <button class="btn btn-buy" onClick={() => handleEditPromotion(promotion._id)}>Editar</button>
+            <button class="btn btn-buy" onClick={() => handleDeletePromotion(promotion._id)}>Eliminar</button>
           </>
+          </div>
         )}
         
         
-        <button onClick={() => handleSelectPromotion(promotion._id)}>Seleccionar</button>
+        <button class="btn btn-buy" onClick={() => handleSelectPromotion(promotion._id)}>Seleccionar</button>
       </div>
     ))
   ) : (
@@ -355,6 +383,22 @@ const PromotionsPage = () => {
                 required
               />
             </div>
+            {promotionData.type === 'PERCENTAGE' && (
+  <div>
+    <label>Descuento (%)</label>
+    <input
+  type="number"
+  value={promotionData.discountPercentage}
+  onChange={(e) =>
+    setPromotionData({
+      ...promotionData,
+      discountPercentage: Number(e.target.value),
+    })
+  }
+  required
+/>
+  </div>
+)}
             <div>
               <label>Fecha de fin</label>
               <input
@@ -424,7 +468,7 @@ const PromotionsPage = () => {
     ))}
   </select>
 </div>
-            <button type="submit">{promotionData._id ? 'Actualizar' : 'Crear'} Promoción</button>
+            <button class="btn btn-buy" type="submit">{promotionData._id ? 'Actualizar' : 'Crear'} Promoción</button>
           </form>
         </div>
       )}

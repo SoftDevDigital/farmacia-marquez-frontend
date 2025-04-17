@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import jwt_decode from 'jwt-decode';
 import { useRouter } from 'next/router';
+import { useCart } from '@/context/CartContext';
+
 
 const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');  
-
+  const { cartCount } = useCart();
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
     if (token) {
@@ -57,9 +59,9 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
           <Link href="/register" className="register-link">o puedes registrarte</Link>
 
           <Link href="/cart" className="cart">
-            <span role="img" aria-label="cart">🛒</span>
-            <span className="cart-count">0</span>
-          </Link>
+          <span role="img" aria-label="cart">🛒</span>
+          <span className="cart-count">{cartCount}</span> 
+        </Link>
         </div>
       </div>
 

@@ -114,7 +114,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
+                  className="password-toggle btn btn-buy" 
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
@@ -125,6 +125,7 @@ const Register = () => {
               <label htmlFor="confirmPassword" className="form-label">Confirmar contraseña</label>
               <div className="password-container">
                 <input
+                
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   className="form-input"
@@ -135,8 +136,10 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="password-toggle"
+                  className="password-toggle btn btn-buy" 
+                
                 >
+                  
                   {showConfirmPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
