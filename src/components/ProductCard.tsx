@@ -4,9 +4,10 @@ import jwt_decode from 'jwt-decode';  // Importa jwt-decode
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
-
+import { useRouter } from 'next/router';
 
 const Products: FC = () => {
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { fetchCartCount } = useCart(); 
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -16,6 +17,7 @@ const Products: FC = () => {
   const [priceFrom, setPriceFrom] = useState<string>('');
   const [priceTo, setPriceTo] = useState<number>(0);
   const [error, setError] = useState('');
+  const router = useRouter();
   const [productData, setProductData] = useState({
     name: '',
     description: '',
@@ -209,7 +211,7 @@ const Products: FC = () => {
   const handleAddToCart = async (productId: string, quantity: number) => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
-      setError('No estás autenticado');
+      setShowLoginModal(true);
       return;
     }
   
@@ -413,6 +415,20 @@ const Products: FC = () => {
 
         
       </div>
+
+      {showLoginModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>Iniciar sesión requerido</h2>
+      <p>Debes iniciar sesión o registrarte para agregar productos al carrito.</p>
+      <div className="modal-buttons">
+        <button className="btn btn-buy" onClick={() => router.push('/login')}>Iniciar sesión</button>
+        <button className="btn btn-buy" onClick={() => router.push('/register')}>Registrarme</button>
+        <button className="btn btn-buy" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+      </div>
+    </div>
+  </div>
+)}
       {isAdmin && (
           <div className="create-product-form">
             <h3>{editingProduct ? 'Editar Producto' : 'Crear Producto'}</h3>

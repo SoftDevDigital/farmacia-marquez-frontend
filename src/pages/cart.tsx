@@ -3,10 +3,14 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '@/context/CartContext';
+import { useRouter } from 'next/router';
+
 const CartPage: FC = () => {
   const [cart, setCart] = useState<any>(null); // Estado para el carrito
   const [error, setError] = useState<string>(''); // Estado para manejar errores
   const [loading, setLoading] = useState<boolean>(true); // Estado de carga mientras obtenemos los datos
+  const router = useRouter();
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [shippingInfo, setShippingInfo] = useState({
     recipientName: '',
     phoneNumber: '',
@@ -22,6 +26,12 @@ const CartPage: FC = () => {
   });
   const [showShippingForm, setShowShippingForm] = useState(false); // Estado para mostrar el formulario de envío
   const { fetchCartCount } = useCart();
+  const [quantityUpdating, setQuantityUpdating] = useState<{ [key: string]: boolean }>({});
+  const [quantityTimers, setQuantityTimers] = useState<{ [key: string]: NodeJS.Timeout }>({});
+
+  const [existingShippingInfo, setExistingShippingInfo] = useState<any>(null);
+  const [showShippingDecision, setShowShippingDecision] = useState(false);
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -151,24 +161,24 @@ const CartPage: FC = () => {
 
   // Función para limpiar todo el carrito
   const handleClearCart = async () => {
-    const token = localStorage.getItem('USER_TOKEN'); // Obtener el token
+    const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
       alert('No estás autenticado');
       return;
     }
-
-    // Limpiar el carrito de manera instantánea en la UI
+  
     setCart({ items: [], total: 0 });
-
+  
     try {
       const response = await axios.delete('http://localhost:3000/cart/clear', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.status === 200) {
         alert('Carrito limpiado con éxito');
+        await fetchCartCount(); // actualiza contador del ícono
       } else {
         alert('Hubo un problema al limpiar el carrito');
       }
@@ -187,51 +197,64 @@ const CartPage: FC = () => {
     setShowShippingForm(true); // Mostrar formulario
   };
 
-  // Función para iniciar el proceso de pago con Mercado Pago
-  const handleCheckout = async () => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      alert('No estás autenticado');
-      return;
-    }
+ 
+ 
 
-    try {
-      const shippingResponse = await axios.post(
-        'http://localhost:3000/users/shipping-info',
-        shippingInfo,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    
-      if (shippingResponse.status === 200 || shippingResponse.status === 201) {
-        const paymentResponse = await axios.post(
-          'http://localhost:3000/payments/checkout',
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-    
-        if (paymentResponse.data.init_point) {
-          // Redirigir al usuario a Mercado Pago
-          window.location.href = paymentResponse.data.init_point;
-        } else {
-          alert('No se pudo iniciar el proceso de pago, intente nuevamente.');
-        }
-      } else {
-        alert('Hubo un problema al actualizar la información de envío');
-      }
-    } catch (error) {
-      console.error('Error al procesar el pago:', error.response?.data || error);
-      alert('Error al procesar la información de pago');
+
+  const updateQuantityDebounced = (productId: string, newQuantity: number) => {
+    if (newQuantity <= 0) return;
+  
+    // Clear previous timeout if exists
+    if (quantityTimers[productId]) {
+      clearTimeout(quantityTimers[productId]);
     }
-  }
+  
+    setQuantityUpdating((prev) => ({ ...prev, [productId]: true }));
+  
+    // Set timeout for backend update
+    const timer = setTimeout(() => {
+      handleUpdateQuantity(productId, newQuantity)
+        .finally(() => {
+          setQuantityUpdating((prev) => ({ ...prev, [productId]: false }));
+        });
+    }, 600); // 600ms delay
+  
+    setQuantityTimers((prev) => ({ ...prev, [productId]: timer }));
+  
+    // Update UI immediately
+    const updatedCart = { ...cart };
+    updatedCart.items = updatedCart.items.map((item: any) =>
+      item.productId === productId ? { ...item, quantity: newQuantity } : item
+    );
+    setCart(updatedCart);
+  };
+
+  useEffect(() => {
+    const fetchExistingShippingInfo = async () => {
+      const token = localStorage.getItem('USER_TOKEN');
+      if (!token) return;
+  
+      try {
+        const res = await axios.get('http://localhost:3000/users/shipping-info', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (res.data) {
+          setExistingShippingInfo(res.data); // guardar datos actuales
+          setShowShippingDecision(true); // mostrar decisión al usuario
+        } else {
+          setShowShippingForm(true); // si no hay datos, mostrar directamente el form
+        }
+      } catch (error) {
+        console.error('No hay información de envío previa o falló la petición');
+        setShowShippingForm(true); // por las dudas mostrar igual el form
+      }
+    };
+  
+    fetchExistingShippingInfo();
+  }, []);
+
+  
   return (
     <div>
       <Header />
@@ -250,6 +273,20 @@ const CartPage: FC = () => {
                 const product = item.product || {}; // Asegurarse de que 'product' siempre sea un objeto
                 return (
                   <div key={item.productId} className="cart-item">
+                    <label>
+  <input
+    type="checkbox"
+    checked={selectedProductIds.includes(item.productId)}
+    onChange={() => {
+      setSelectedProductIds((prev) =>
+        prev.includes(item.productId)
+          ? prev.filter((id) => id !== item.productId)
+          : [...prev, item.productId]
+      );
+    }}
+  />
+  Seleccionar
+</label>
                     {product.name ? (
                       <>
                         <img
@@ -262,17 +299,26 @@ const CartPage: FC = () => {
                           <p>Precio unitario: ${product.discountedPrice ?? item.price}</p>
 <p>Cantidad: {item.quantity}</p>
 <p>Total del producto: ${item.finalPrice !== undefined ? item.finalPrice : (item.price * item.quantity)}</p>
-                          <div>
-                            <label>Cantidad: </label>
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              min="1"
-                              onChange={(e) =>
-                                handleUpdateQuantity(item.productId, Number(e.target.value))
-                              }
-                            />
-                          </div>
+<div className="quantity-wrapper">
+  <label>Cantidad: </label>
+  <div className="quantity-controls">
+    <button
+      disabled={quantityUpdating[item.productId]}
+      onClick={() => updateQuantityDebounced(item.productId, item.quantity - 1)}
+    >−</button>
+    
+    {quantityUpdating[item.productId] ? (
+      <span className="spinner">⏳</span>
+    ) : (
+      <span>{item.quantity}</span>
+    )}
+    
+    <button
+      disabled={quantityUpdating[item.productId]}
+      onClick={() => updateQuantityDebounced(item.productId, item.quantity + 1)}
+    >+</button>
+  </div>
+</div>
                           <button className="btn btn-buy" onClick={() => handleRemoveItem(item.productId)}>
                             Eliminar
                           </button>
@@ -288,67 +334,64 @@ const CartPage: FC = () => {
           </div>
           
         )}
-        {cart?.total !== undefined && (
+       {cart?.items && (
   <div className="cart-total">
-    <h3>Total del carrito: ${cart.total}</h3>
+    <h3>Total seleccionado: $
+      {
+        cart.items
+          .filter((item: any) => selectedProductIds.includes(item.productId))
+          .reduce((acc: number, item: any) => {
+            const finalPrice = item.finalPrice !== undefined ? item.finalPrice : item.price * item.quantity;
+            return acc + finalPrice;
+          }, 0)
+      }
+    </h3>
   </div>
 )}
-        {/* Botón para mostrar el formulario de envío */}
-        <button className="toggle-shipping-button btn btn-buy" onClick={() => setShowShippingForm(!showShippingForm)}>
-  {showShippingForm ? 'Ocultar Información de Envío' : 'Iniciar Proceso de Pago'}
+
+{cart?.items.length > 0 && (
+  <div style={{ marginTop: '1rem' }}>
+    <button className="btn btn-buy" onClick={handleClearCart}>
+      Limpiar carrito
+    </button>
+  </div>
+)}
+
+{showShippingDecision && existingShippingInfo && (
+  <div className="shipping-decision">
+    <h3>¿Querés usar tu información de envío guardada?</h3>
+    <div className="saved-shipping-info">
+      <p><strong>Nombre:</strong> {existingShippingInfo.recipientName}</p>
+      <p><strong>Teléfono:</strong> {existingShippingInfo.phoneNumber}</p>
+      <p><strong>Dirección:</strong> {existingShippingInfo.street} {existingShippingInfo.streetNumber}, {existingShippingInfo.city}, {existingShippingInfo.state}, {existingShippingInfo.country}</p>
+    </div>
+    <div className="decision-buttons">
+      <button className="btn btn-buy" onClick={() => {
+        setShippingInfo(existingShippingInfo);
+        setShowShippingForm(true);
+        setShowShippingDecision(false);
+      }}>
+        Usar esta información
+      </button>
+      <button className="btn btn-buy" onClick={() => {
+        setShowShippingForm(true);
+        setShowShippingDecision(false);
+      }}>
+        Ingresar nueva información
+      </button>
+    </div>
+  </div>
+)}
+        <button
+  className="toggle-shipping-button btn btn-buy"
+  onClick={() => {
+    localStorage.setItem('selectedProductIds', JSON.stringify(selectedProductIds));
+    router.push('/checkout');
+  }}
+>
+  Iniciar Proceso de Pago
 </button>
-        {showShippingForm && (
-          <>
-            <h2>Información de Envío</h2>
-            <form className="shipping-form">
-  <div className="form-group">
-    <label htmlFor="recipientName">Nombre:</label>
-    <input type="text" id="recipientName" name="recipientName" value={shippingInfo.recipientName} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="phoneNumber">Teléfono:</label>
-    <input type="text" id="phoneNumber" name="phoneNumber" value={shippingInfo.phoneNumber} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="documentNumber">Documento:</label>
-    <input type="text" id="documentNumber" name="documentNumber" value={shippingInfo.documentNumber} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="street">Dirección:</label>
-    <input type="text" id="street" name="street" value={shippingInfo.street} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="streetNumber">Número:</label>
-    <input type="text" id="streetNumber" name="streetNumber" value={shippingInfo.streetNumber} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="apartment">Departamento:</label>
-    <input type="text" id="apartment" name="apartment" value={shippingInfo.apartment} onChange={handleChange} />
-  </div>
-  <div className="form-group">
-    <label htmlFor="city">Ciudad:</label>
-    <input type="text" id="city" name="city" value={shippingInfo.city} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="state">Provincia:</label>
-    <input type="text" id="state" name="state" value={shippingInfo.state} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="postalCode">Código Postal:</label>
-    <input type="text" id="postalCode" name="postalCode" value={shippingInfo.postalCode} onChange={handleChange} required />
-  </div>
-  <div className="form-group">
-    <label htmlFor="country">País:</label>
-    <input type="text" id="country" name="country" value={shippingInfo.country} onChange={handleChange} required />
-  </div>
-  <div className="form-group full-width">
-    <label htmlFor="additionalNotes">Notas adicionales:</label>
-    <textarea id="additionalNotes" name="additionalNotes" value={shippingInfo.additionalNotes} onChange={handleChange} />
-  </div>
-</form>
-            <button className="btn btn-buy" onClick={handleCheckout}>Confirmar Información y Pagar</button>
-          </>
-        )}
+       
       </div>
       <Footer />
     </div>

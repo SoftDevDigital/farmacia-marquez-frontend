@@ -1606,3 +1606,96 @@ button:hover {
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-controls button {
+  background-color: #14b8a6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.quantity-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity-controls .spinner {
+  font-size: 14px;
+  color: #888;
+}
+
+
+
+
+.cart-item-info .btn.btn-buy {
+  margin-top: 12px; /* separa el botón de los controles */
+}
+
+.quantity-wrapper {
+  margin-bottom: 8px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.product-detail img {
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+.cart-item-image {
+  max-width: 120px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item-info {
+  flex: 1;
+}

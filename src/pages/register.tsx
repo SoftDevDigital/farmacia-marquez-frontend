@@ -136,7 +136,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="password-toggle btn btn-buy" 
+                  className="password-toggle c" 
                 
                 >
                   

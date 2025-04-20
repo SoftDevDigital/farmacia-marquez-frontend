@@ -72,12 +72,20 @@ const AffiliatesPage = () => {
     fetchAffiliates();
   }, [router]);
 
-  // Función para manejar la selección de un afiliado para editar
   const handleEditAffiliate = (affiliateId: string) => {
     const affiliateToEdit = affiliates.find((affiliate) => affiliate._id === affiliateId);
     if (affiliateToEdit) {
-      setAffiliateData(affiliateToEdit);
-      setEditingAffiliateId(affiliateId); // Establecer el ID del afiliado a editar
+      // Asegurar formato YYYY-MM-DD
+      const formattedDate = affiliateToEdit.birthDate
+        ? new Date(affiliateToEdit.birthDate).toISOString().split('T')[0]
+        : '';
+  
+      setAffiliateData({
+        ...affiliateToEdit,
+        birthDate: formattedDate,
+      });
+  
+      setEditingAffiliateId(affiliateId);
     }
   };
 
