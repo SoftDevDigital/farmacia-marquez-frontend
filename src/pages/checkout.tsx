@@ -107,18 +107,12 @@ const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
         const paymentResponse = await axios.post(
           'http://localhost:3000/payments/checkout',
           {
-            items: selectedItems.map((item: any) => {
-              const price = item.finalPrice ?? item.price * item.quantity;
-              return {
-                productId: item.productId,
-                quantity: item.quantity,
-                finalPrice: price
-              };
-            })
+            selectedProductIds: selectedItems.map((item: any) => item.productId),
           },
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
             },
           }
         );
