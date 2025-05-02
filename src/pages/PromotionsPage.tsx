@@ -287,7 +287,7 @@ const PromotionsPage = () => {
         )}
         
         
-        <button class="btn btn-buy" onClick={() => handleSelectPromotion(promotion._id)}>Seleccionar</button>
+        
       </div>
     ))
   ) : (
@@ -434,7 +434,7 @@ const PromotionsPage = () => {
             </div>
             {promotionData.type === 'PERCENT_SECOND' && (
               <div>
-                <label>Descuento en la segunda unidad</label>
+                <label>Descuento en la segunda unidad (%)</label>
                 <input
                   type="number"
                   value={promotionData.discountPercentageSecond}

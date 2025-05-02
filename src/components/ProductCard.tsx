@@ -386,9 +386,7 @@ const Products: FC = () => {
   </p>
 )}
       <p className="product-stock">Stock: {product.stock}</p>
-      {product.discount && product.discountedPrice < product.price && (
-      <div className="discount-tag">{product.discount}% OFF</div>
-    )}
+     
       {product.installment && (
         <p className="installment">3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}</p>
       )}

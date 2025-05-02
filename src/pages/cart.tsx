@@ -32,57 +32,54 @@ const CartPage: FC = () => {
   const [existingShippingInfo, setExistingShippingInfo] = useState<any>(null);
   const [showShippingDecision, setShowShippingDecision] = useState(false);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const token = localStorage.getItem('USER_TOKEN');
-        if (!token) {
-          alert('No se ha encontrado el token de usuario');
-          return;
-        }
-
-        const response = await axios.get('http://localhost:3000/cart', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.status === 200) {
-          // Cargar los datos correctamente
-          const cartWithProductDetails = await Promise.all(
-            response.data.items.map(async (item: any) => {
-              try {
-                // Obtener el producto con el ID desde la base de datos o API
-                const productResponse = await axios.get(
-                  `http://localhost:3000/products/${item.productId}`
-                );
-                const product = productResponse.data; // Asume que la respuesta contiene el producto completo
-
-                return {
-                  ...item,
-                  price: item.price ?? product.price, // importante: asegura el precio
-                  product: product || {},
-                };
-              } catch (error) {
-                console.error('Error al obtener el producto:', error);
-                return { ...item, product: {} }; // Si falla, devolver un objeto vacío para product
-              }
-            })
-          );
-
-          setCart({ ...response.data, items: cartWithProductDetails }); // Establecer el carrito con productos completos
-        } else {
-          setError('No se pudo obtener el carrito.');
-        }
-      } catch (error) {
-        setError('Error al cargar el carrito.');
-        console.error(error);
-      } finally {
-        setLoading(false); // Finalizar carga
+  const fetchCart = async () => {
+    try {
+      const token = localStorage.getItem('USER_TOKEN');
+      if (!token) {
+        alert('No se ha encontrado el token de usuario');
+        return;
       }
-    };
+  
+      const response = await axios.get('http://localhost:3000/cart', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (response.status === 200) {
+        const cartWithProductDetails = await Promise.all(
+          response.data.items.map(async (item: any) => {
+            try {
+              const productResponse = await axios.get(
+                `http://localhost:3000/products/${item.productId}`
+              );
+              const product = productResponse.data;
+  
+              return {
+                ...item,
+                price: item.price ?? product.price,
+                product: product || {},
+              };
+            } catch (error) {
+              console.error('Error al obtener el producto:', error);
+              return { ...item, product: {} };
+            }
+          })
+        );
+  
+        setCart({ ...response.data, items: cartWithProductDetails });
+      } else {
+        setError('No se pudo obtener el carrito.');
+      }
+    } catch (error) {
+      setError('Error al cargar el carrito.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCart();
   }, []);
-
   // Función para actualizar la cantidad de un producto en el carrito
   const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -107,7 +104,7 @@ const CartPage: FC = () => {
     try {
       const response = await axios.patch(
         `http://localhost:3000/cart/update/${productId}`,
-        { quantity: newQuantity }, // Cuerpo de la solicitud
+        { quantity: newQuantity },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -115,15 +112,17 @@ const CartPage: FC = () => {
           },
         }
       );
-
-      if (response.status !== 200) {
+    
+      if (response.status === 200) {
+        await fetchCart(); // 🔁 ← Esto refresca el `discountedSubtotal`
+      } else {
         alert('Hubo un problema al actualizar la cantidad');
       }
     } catch (error) {
       console.error(error);
       alert('Error al actualizar la cantidad del producto');
     }
-  };
+  }
 
   // Función para eliminar un producto del carrito
   const handleRemoveItem = async (productId: string) => {
@@ -298,7 +297,7 @@ const CartPage: FC = () => {
                           <h3>{product.name}</h3>
                           <p>Precio unitario: ${product.discountedPrice ?? item.price}</p>
 <p>Cantidad: {item.quantity}</p>
-<p>Total del producto: ${item.finalPrice !== undefined ? item.finalPrice : (item.price * item.quantity)}</p>
+<p>Total del producto: ${item.discountedSubtotal ?? (item.finalPrice !== undefined ? item.finalPrice : (item.price * item.quantity))}</p>
 <div className="quantity-wrapper">
   <label>Cantidad: </label>
   <div className="quantity-controls">
@@ -340,10 +339,7 @@ const CartPage: FC = () => {
       {
         cart.items
           .filter((item: any) => selectedProductIds.includes(item.productId))
-          .reduce((acc: number, item: any) => {
-            const finalPrice = item.finalPrice !== undefined ? item.finalPrice : item.price * item.quantity;
-            return acc + finalPrice;
-          }, 0)
+          .reduce((acc: number, item: any) => acc + (item.discountedSubtotal ?? item.finalPrice ?? item.price * item.quantity), 0)
       }
     </h3>
   </div>

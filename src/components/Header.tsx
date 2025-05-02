@@ -73,10 +73,7 @@ useEffect(() => {
   return () => clearTimeout(debounce); // Limpiar el timeout al desmontar o cambiar el término
 }, [searchTerm]);
 
-const handleSearch = () => {
-  onSearch(searchTerm); // Pasamos el término de búsqueda al componente padre
-  setIsDropdownOpen(false); // Cerrar el dropdown al hacer una búsqueda manual
-};
+
 
 const handleResultClick = (productId: string) => {
   setIsDropdownOpen(false); // Cerrar el dropdown al seleccionar un producto
@@ -103,9 +100,7 @@ const handleResultClick = (productId: string) => {
             onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
             onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} // Retraso para permitir clics en el dropdown
           />
-          <button className="search-button" onClick={handleSearch}>
-            <span role="img" aria-label="search">🔍</span>
-          </button>
+       
 
           {isDropdownOpen && searchResults.length > 0 && (
             <div

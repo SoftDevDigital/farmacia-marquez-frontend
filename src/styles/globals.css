@@ -1699,3 +1699,15 @@ button:hover {
 .cart-item-info {
   flex: 1;
 }
+
+.brand-form input {
+  margin-bottom: 10px;
+}
+
+.brand-list {
+  margin-top: 30px;
+}
+
+.brand-card {
+  margin-bottom: 20px;
+}

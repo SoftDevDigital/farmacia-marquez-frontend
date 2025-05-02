@@ -10,129 +10,135 @@ const Categories: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]); 
-  const [categoryData, setCategoryData] = useState({
-    name: '',
-    subcategories: [{ name: '' }],
-  });
+  const [categoryData, setCategoryData] = useState({ name: '', subcategories: [{ name: '' }] });
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const router = useRouter();
 
-  // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      return;
-    }
+    if (!token) return;
     try {
       const decodedToken = jwt_decode(token) as { role: string };
-      if (decodedToken.role === 'ADMIN') {
-        setIsAdmin(true);
-      }
+      if (decodedToken.role === 'ADMIN') setIsAdmin(true);
     } catch (err) {
       console.error('Error al verificar el rol', err);
     }
   }, []);
 
-  // Fetch categories from API
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/categories');
-        setCategories(response.data);
-      } catch (error) {
-        setError('Error al cargar las categorías');
-      }
-    };
-    fetchCategories();
+    axios.get('http://localhost:3000/categories')
+      .then(res => setCategories(res.data))
+      .catch(() => setError('Error al cargar las categorías'));
   }, []);
 
-  // Cargar todos los productos al principio
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/products'); // Obtiene todos los productos
-      setProducts(response.data); // Establece los productos sin filtrar
-    } catch (error) {
-      setError('Error al cargar los productos');
-    }
-  };
-  
-  fetchProducts();
-}, []); // Solo se ejecuta una vez cuando el componente se monta
+  useEffect(() => {
+    axios.get('http://localhost:3000/products')
+      .then(res => setProducts(res.data))
+      .catch(() => setError('Error al cargar los productos'));
+  }, []);
 
-// Filtrado de productos cuando cambian la categoría o subcategoría
-useEffect(() => {
-  const fetchFilteredProducts = async () => {
-    if (!selectedCategory) return; // No filtrar si no hay categoría seleccionada
-
-    // Crear la URL para la API según los filtros seleccionados
+  useEffect(() => {
+    if (!selectedCategory) return;
     const url = selectedSubcategory
-    ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
-    : `http://localhost:3000/products?categoryId=${selectedCategory}`;
+      ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
+      : `http://localhost:3000/products?categoryId=${selectedCategory}`;
 
-    try {
-      const response = await axios.get(url); // Llamada a la API con los filtros
-      setProducts(response.data); // Establece los productos filtrados
-    } catch (error) {
-      setError('Error al cargar los productos filtrados');
-    }
-  };
+    axios.get(url)
+      .then(res => setProducts(res.data))
+      .catch(() => setError('Error al cargar los productos filtrados'));
+  }, [selectedCategory, selectedSubcategory]);
 
-  fetchFilteredProducts();
-}, [selectedCategory, selectedSubcategory]); 
-
-
-  // Manejar cambio de categoría seleccionada
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
     setSelectedSubcategory('');
   };
 
-  // Manejar cambio de subcategoría seleccionada
-  const handleSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleFilterSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedSubcategory(e.target.value);
   };
 
-  // Crear nueva categoría
   const handleSubmitCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('USER_TOKEN');
+    if (!token) return alert('No estás autenticado');
+    if (!categoryData.name || categoryData.subcategories.some(sub => !sub.name)) {
+      return alert('Completá todos los campos');
+    }
     try {
-      const res = await axios.post(
-        'http://localhost:3000/categories',
-        categoryData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      const res = await axios.post('http://localhost:3000/categories', categoryData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
       if (res.status === 201) {
         alert('Categoría creada con éxito');
         setCategories([...categories, res.data]);
         setCategoryData({ name: '', subcategories: [{ name: '' }] });
-      } else {
-        alert('Hubo un problema al crear la categoría');
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       alert('Error al crear la categoría');
     }
   };
 
-  // Filtrar (puedes ajustar esta función para redirigir a una página de productos filtrados)
-  const handleFilter = () => {
-    if (selectedCategory && selectedSubcategory) {
-      router.push(`/products?category=${selectedCategory}&subcategory=${selectedSubcategory}`);
-    } else if (selectedCategory) {
-      router.push(`/products?category=${selectedCategory}`);
+  const handleUpdateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token || !editingCategory) return alert('No estás autenticado o sin categoría seleccionada');
+    try {
+      const payload = {
+        name: categoryData.name,
+        subcategories: categoryData.subcategories.map(sub => sub._id ? { _id: sub._id, name: sub.name } : { name: sub.name })
+      };
+      const res = await axios.patch(`http://localhost:3000/categories/${editingCategory}`, payload, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (res.status === 200) {
+        alert('Categoría actualizada con éxito');
+        setCategories(categories.map(cat => cat._id === editingCategory ? res.data : cat));
+        setCategoryData({ name: '', subcategories: [{ name: '' }] });
+        setEditingCategory(null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al actualizar la categoría');
     }
   };
 
+  const handleDeleteCategory = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta categoría?')) return;
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) return alert('No estás autenticado');
+  
+    try {
+      const res = await axios.delete(`http://localhost:3000/categories/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        validateStatus: (status) => status < 500 // Evita que axios lance automáticamente un error por código 4xx
+      });
+  
+      if (res.status === 204 || res.status === 200) {
+        setCategories(categories.filter(c => c._id !== id));
+        alert('Categoría eliminada con éxito');
+      } else {
+        alert('Hubo un problema al eliminar la categoría');
+      }
+    } catch (err) {
+      console.error('Error inesperado al eliminar la categoría:', err);
+      alert('Error inesperado al eliminar la categoría');
+    }
+  };
+  
+
+  const handleAddSubcategory = () => setCategoryData(prev => ({ ...prev, subcategories: [...prev.subcategories, { name: '' }] }));
+  const handleRemoveSubcategory = (i: number) => setCategoryData(prev => ({ ...prev, subcategories: prev.subcategories.filter((_, idx) => idx !== i) }));
+  const handleSubcategoryChange = (i: number, value: string) => {
+    const updated = [...categoryData.subcategories];
+    updated[i].name = value;
+    setCategoryData({ ...categoryData, subcategories: updated });
+  };
 
   const handleAddToCart = async (productId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -172,131 +178,79 @@ useEffect(() => {
     <div>
       <Header />
       <div className="categories-page">
-        {/* Sidebar con filtros */}
         <div className="sidebar">
-          <h3 className="form-label">Categorías</h3>
-          <div className="form-group">
-            <select
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              className="filter-select"
-            >
-              <option value="">Selecciona una categoría</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <select
-              value={selectedSubcategory}
-              onChange={handleSubcategoryChange}
-              className="filter-select"
-              disabled={!selectedCategory}
-            >
-              <option value="">Selecciona una subcategoría</option>
-              {selectedCategory &&
-                categories
-                  .find((category) => category._id === selectedCategory)
-                  ?.subcategories.map((subcategory: any, index: number) => (
-                    <option key={index} value={subcategory._id}>
-                      {subcategory.name}
-                    </option>
-                  ))}
-            </select>
-          </div>
-        
-
-          {/* Formulario para crear categoría (visible solo para admins) */}
-          {isAdmin && (
-            <div className="form-group">
-              <h3 className="form-label">
-                {editingCategory ? 'Editar Categoría' : 'Crear Categoría'}
-              </h3>
-              <form onSubmit={handleSubmitCreate} className="form-group">
-                <div className="form-group">
-                  <label className="form-label">Nombre de la categoría:</label>
-                  <input
-                    type="text"
-                    placeholder="Nombre de la categoría"
-                    value={categoryData.name}
-                    onChange={(e) =>
-                      setCategoryData({ ...categoryData, name: e.target.value })
-                    }
-                    className="form-input"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Nombre de la subcategoría:</label>
-                  <input
-                    type="text"
-                    placeholder="Nombre de la subcategoría"
-                    value={categoryData.subcategories[0].name}
-                    onChange={(e) =>
-                      setCategoryData({
-                        ...categoryData,
-                        subcategories: [{ name: e.target.value }],
-                      })
-                    }
-                    className="form-input"
-                    required
-                  />
-                </div>
-                <button type="submit" className="submit-button">
-                  {editingCategory ? 'Actualizar Categoría' : 'Crear Categoría'}
-                </button>
-              </form>
-            </div>
-          )}
+          <h3>Categorías</h3>
+          <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select">
+            <option value="">Selecciona una categoría</option>
+            {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
+          </select>
+          <select value={selectedSubcategory} onChange={handleFilterSubcategoryChange} className="filter-select" disabled={!selectedCategory}>
+            <option value="">Selecciona una subcategoría</option>
+            {selectedCategory && categories.find(c => c._id === selectedCategory)?.subcategories.map((sub: any) => (
+              <option key={sub._id} value={sub._id}>{sub.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="product-grid">
-          <h2 className="grid-header">Productos</h2>
+          <h2>Productos</h2>
           {error && <p className="error-message">{error}</p>}
           <div className="category-list">
-            {products.length > 0 ? (
-              products.map((product) => (
-                <div key={product._id} className="product-card">
-                <img
-                  src={product.imageUrl || '/default-image.jpg'}
-                  alt={product.name}
-                  className="product-image"
-                />
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-description">{product.description}</p>
-                {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
-  <p className="product-price">
-    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
-      ${product.price.toLocaleString('es-AR')}
-    </span>
-    <span style={{ fontWeight: 'bold', color: 'green' }}>
-      ${product.discountedPrice.toLocaleString('es-AR')}
-    </span>
-  </p>
-) : (
-  <p className="product-price">
-    ${product.price.toLocaleString('es-AR')}
-  </p>
-)}
-                <p className="product-stock">Stock: {product.stock}</p>
-                {product.discount && (
-                  <div className="discount-tag">{product.discount}% OFF</div>
-                )}
-                <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
+            {products.map(prod => (
+              <div key={prod._id} className="product-card">
+                <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" />
+                <h3>{prod.name}</h3>
+                <p>{prod.description}</p>
+                <p className="product-price">
+                  {prod.discountedPrice !== undefined && prod.discountedPrice < prod.price ? (
+                    <>
+                      <span style={{ textDecoration: 'line-through', color: 'gray' }}>${prod.price.toLocaleString('es-AR')}</span>
+                      <span style={{ fontWeight: 'bold', color: 'green' }}> ${prod.discountedPrice.toLocaleString('es-AR')}</span>
+                    </>
+                  ) : `$${prod.price.toLocaleString('es-AR')}`}
+                </p>
+                <p>Stock: {prod.stock}</p>
+                <button className="btn btn-buy" onClick={() => handleAddToCart(prod._id)}>Comprar</button>
               </div>
-              
-              ))
-            ) : (
-              <p>No hay productos disponibles en esta categoría.</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {isAdmin && (
+        <div className="create-brand-form">
+          <h3>{editingCategory ? 'Editar Categoría' : 'Crear Categoría'}</h3>
+          <form onSubmit={editingCategory ? handleUpdateCategory : handleSubmitCreate} className="brand-form">
+            <input type="text" placeholder="Nombre de la categoría" value={categoryData.name} onChange={(e) => setCategoryData({ ...categoryData, name: e.target.value })} required />
+            {categoryData.subcategories.map((sub, index) => (
+              <div key={index} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input type="text" placeholder={`Subcategoría ${index + 1}`} value={sub.name} onChange={(e) => handleSubcategoryChange(index, e.target.value)} required />
+                {categoryData.subcategories.length > 1 && (
+                  <button type="button" onClick={() => handleRemoveSubcategory(index)} className="btn btn-delete">X</button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={handleAddSubcategory} className="btn btn-edit">+ Subcategoría</button>
+            <button type="submit" className="btn btn-buy">{editingCategory ? 'Actualizar Categoría' : 'Crear Categoría'}</button>
+          </form>
+        </div>
+      )}
+
+      <div className="brand-list">
+        {categories.map((cat) => (
+          <div key={cat._id} className="brand-card">
+            <h3>{cat.name}</h3>
+            {isAdmin && (
+              <div className="brand-buttons">
+                <button className="btn btn-edit" onClick={() => {
+                  setCategoryData({ name: cat.name, subcategories: cat.subcategories.map((sub: any) => ({ ...sub })) });
+                  setEditingCategory(cat._id);
+                }}>Editar Categoría</button>
+                <button className="btn btn-delete" onClick={() => handleDeleteCategory(cat._id)}>Eliminar Categoría</button>
+              </div>
             )}
           </div>
-
-          </div>
-       
-      
+        ))}
       </div>
       <Footer />
     </div>

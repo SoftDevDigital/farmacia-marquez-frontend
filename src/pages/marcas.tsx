@@ -282,9 +282,7 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
 
     <p className="product-stock">Stock: {product.stock}</p>
 
-    {product.discount && product.discountedPrice < product.price && (
-  <div className="discount-tag">{product.discount}% OFF</div>
-)}
+   
     <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
   </div>
 ))}
