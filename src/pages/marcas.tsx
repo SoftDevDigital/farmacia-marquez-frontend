@@ -3,6 +3,8 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';  // Para verificar el rol
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
+import { useCart } from '@/context/CartContext';
+
 
 const Marcas: FC = () => {
   const [categories, setCategories] = useState<any[]>([]); 
@@ -16,6 +18,7 @@ const Marcas: FC = () => {
   const [brandName, setBrandName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingBrand, setEditingBrand] = useState<string | null>(null); // Estado para la marca en edición
+  const { fetchCartCount } = useCart();
 
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
@@ -192,6 +195,7 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
       );
   
       if (response.status === 201) {
+        await fetchCartCount();  // ✅ ACTUALIZA el contador
         alert('Producto agregado al carrito');
       } else {
         alert('Hubo un problema al agregar el producto');

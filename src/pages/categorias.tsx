@@ -4,6 +4,7 @@ import jwt_decode from 'jwt-decode';
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
+import { useCart } from '@/context/CartContext';
 
 const Categories: FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -15,7 +16,9 @@ const Categories: FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const router = useRouter();
+  const { fetchCartCount } = useCart();
 
+  
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) return;
@@ -164,6 +167,7 @@ const Categories: FC = () => {
       );
   
       if (response.status === 201) {
+        await fetchCartCount(); // ✅ ACTUALIZA el contador del carrito
         alert('Producto agregado al carrito');
       } else {
         alert('Hubo un problema al agregar el producto');
@@ -174,6 +178,7 @@ const Categories: FC = () => {
     }
   };
 
+  
   return (
     <div>
       <Header />

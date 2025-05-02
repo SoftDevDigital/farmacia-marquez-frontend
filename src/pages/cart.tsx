@@ -31,6 +31,7 @@ const CartPage: FC = () => {
 
   const [existingShippingInfo, setExistingShippingInfo] = useState<any>(null);
   const [showShippingDecision, setShowShippingDecision] = useState(false);
+ 
 
   const fetchCart = async () => {
     try {
@@ -66,6 +67,11 @@ const CartPage: FC = () => {
         );
   
         setCart({ ...response.data, items: cartWithProductDetails });
+  
+        // 👉 INICIALIZAR SELECCIONADOS
+        const allProductIds = cartWithProductDetails.map((item: any) => item.productId);
+        setSelectedProductIds(allProductIds);
+  
       } else {
         setError('No se pudo obtener el carrito.');
       }
