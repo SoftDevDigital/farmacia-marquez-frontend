@@ -767,14 +767,7 @@
   color: #333;
 }
 
-.filter-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
+
 
 .price-filter {
   display: flex;
@@ -1710,4 +1703,119 @@ button:hover {
 
 .brand-card {
   margin-bottom: 20px;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+  50% { transform: translateY(4px); }
+  100% { transform: translateY(0); }
+}
+
+.cart-icon.bounce {
+  animation: bounce 0.5s ease;
+}
+
+.product-description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #14b8a6; /* ✅ Mismo verde que el botón */
+  font-size: 1.2rem;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-group h2,
+.filter-group h3,
+.filter-group h4 {
+  margin: 0;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.select-categoria {
+  width: auto !important;
+  max-width: 180px;
+}
+.sidebar h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px 0 8px;
+  color: #333;
+}
+
+.sidebar h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.sidebar label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-filter label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.price-filter input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  background-color: #f5f5f5;
+}
+
+.sidebar h2, .sidebar h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
 }

@@ -5,6 +5,8 @@ import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+
 
 const Products: FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -222,46 +224,39 @@ const Products: FC = () => {
     }
   
     const price = product.price;
-  
-    // Si el producto tiene promoción tipo NXN, se duplica la cantidad
     let finalQuantity = quantity;
-    let totalPrice = product.price * quantity; // Por defecto
-    
+    let totalPrice = product.price * quantity;
+  
     if (product.appliedPromotion?.type === 'NXN') {
       const buyQty = product.appliedPromotion.buyQuantity || 1;
       const getQty = product.appliedPromotion.getQuantity || 1;
       const fullGroups = Math.floor(quantity / buyQty);
       const remaining = quantity % buyQty;
-    
+  
       finalQuantity = fullGroups * (buyQty + getQty) + remaining;
       totalPrice = fullGroups * buyQty * product.price + remaining * product.price;
     }
-    
-
+  
     if (product.appliedPromotion && product.promotionType === 'PERCENT_SECOND') {
       if (quantity >= 2) {
         const pairs = Math.floor(quantity / 2);
         const remaining = quantity % 2;
-    
-        const fullPriceUnits = pairs; // primeros productos
-        const discountedUnits = pairs; // segundos productos con descuento
-        const extraUnits = remaining; // unidades sueltas sin aplicar promo
-    
         const discount = product.appliedPromotion.discountPercentage || 0;
         const discountedPrice = product.price * (1 - discount / 100);
-    
-        totalPrice = (fullPriceUnits * product.price) + (discountedUnits * discountedPrice) + (extraUnits * product.price);
+  
+        totalPrice = (pairs * product.price) + (pairs * discountedPrice) + (remaining * product.price);
       } else {
         totalPrice = product.price * quantity;
       }
     }
+  
     try {
       const response = await axios.post(
         'http://localhost:3000/cart/add',
         {
           productId,
-          quantity: finalQuantity,      // 2 unidades visibles
-          finalPrice: totalPrice,       // pero solo se paga 1 si es 2x1
+          quantity: finalQuantity,
+          finalPrice: totalPrice,
           applyDiscount: true
         },
         {
@@ -271,16 +266,48 @@ const Products: FC = () => {
           },
         }
       );
-      await fetchCartCount();
+  
       if (response.status === 201) {
-        alert('Producto agregado al carrito');
+        await fetchCartCount(); // ✅ actualiza el contador del carrito
+        const productImage = document.querySelector(`img[data-product-id="${productId}"]`);
+const cartIcon = document.querySelector('.cart-icon');
+
+if (productImage && cartIcon) {
+  const imgRect = productImage.getBoundingClientRect();
+  const cartRect = cartIcon.getBoundingClientRect();
+
+  const flyingImg = productImage.cloneNode(true) as HTMLElement;
+  flyingImg.style.position = 'fixed';
+  flyingImg.style.top = `${imgRect.top}px`;
+  flyingImg.style.left = `${imgRect.left}px`;
+  flyingImg.style.width = `${imgRect.width}px`;
+  flyingImg.style.height = `${imgRect.height}px`;
+  flyingImg.style.transition = 'all 0.8s ease-in-out';
+  flyingImg.style.zIndex = '9999';
+
+  document.body.appendChild(flyingImg);
+
+  requestAnimationFrame(() => {
+    flyingImg.style.top = `${cartRect.top}px`;
+    flyingImg.style.left = `${cartRect.left}px`;
+    flyingImg.style.width = '20px';
+    flyingImg.style.height = '20px';
+    flyingImg.style.opacity = '0.5';
+  });
+
+  flyingImg.addEventListener('transitionend', () => {
+    flyingImg.remove();
+    cartIcon.classList.add('bounce');
+    setTimeout(() => cartIcon.classList.remove('bounce'), 500);
+  });
+}
+
       } else {
-        alert('Hubo un problema al agregar el producto al carrito');
+        setError('Hubo un problema al agregar el producto al carrito');
       }
     } catch (error) {
       console.error(error);
       setError('Error al agregar el producto al carrito');
-      alert('Hubo un error al agregar el producto al carrito');
     }
   };
 
@@ -295,7 +322,7 @@ const Products: FC = () => {
       });
 
       if (res.status === 200) {
-        alert('Producto eliminado con éxito');
+        
         setProducts(products.filter((product) => product._id !== productId));
       } else {
         alert('Hubo un problema al eliminar el producto');
@@ -312,24 +339,24 @@ const Products: FC = () => {
       <div className="products-page">
         <aside className="sidebar">
           <h2>Categorías</h2>
-          <select className="filter-select" onChange={(e) => setSelectedCategory(e.target.value)}>
-            <option>Categorías</option>
-            {categories.map((category) => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+         <select className="filter-select" onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
+  <option value="">Todas las categorías</option>
+  {categories.map((category) => (
+    <option key={category._id} value={category._id}>
+      {category.name}
+    </option>
+  ))}
+</select>
 
           <h3>Marca</h3>
-          <select className="filter-select" onChange={(e) => setSelectedBrand(e.target.value)} value={selectedBrand}>
-            <option>Marca</option>
-            {filteredBrands.map((brand) => (
-              <option key={brand._id} value={brand._id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
+         <select className="filter-select" onChange={(e) => setSelectedBrand(e.target.value)} value={selectedBrand}>
+  <option value="">Todas las marcas</option>
+  {filteredBrands.map((brand) => (
+    <option key={brand._id} value={brand._id}>
+      {brand.name}
+    </option>
+  ))}
+</select>
 
           <h3>Filtrar por</h3>
 <h4>Precio</h4>
@@ -364,51 +391,53 @@ const Products: FC = () => {
             </div>
           </div>
 
-          <div className="products">
+         <div className="products">
   {filteredProducts.map((product) => (
     <div key={product._id} className="product-card">
-      
-      <img src={product.imageUrl} alt={product.name} className="product-image" />
-      <h3 className="product-name">{product.name}</h3>
-      <p className="product-description">{product.description}</p>
-      {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
-  <p className="product-price">
-    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
-      ${product.price.toLocaleString('es-AR')}
-    </span>
-    <span style={{ fontWeight: 'bold', color: 'green' }}>
-      ${product.discountedPrice.toLocaleString('es-AR')}
-    </span>
-  </p>
-) : (
-  <p className="product-price">
-    ${product.price.toLocaleString('es-AR')}
-  </p>
-)}
-      <p className="product-stock">Stock: {product.stock}</p>
-     
-      {product.installment && (
-        <p className="installment">3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}</p>
-      )}
-      <div className="product-buttons">
+      <Link href={`/products/${product._id}`} passHref legacyBehavior>
+        <a style={{ textDecoration: 'none', color: 'inherit' }}>
+          <img src={product.imageUrl} alt={product.name} data-product-id={product._id} className="product-image" />
+          <h3 className="product-name">{product.name}</h3>
+          <p className="product-description">
+            {product.description.length > 40
+              ? product.description.slice(0, 40) + '...'
+              : product.description}
+          </p>
+          {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+            <p className="product-price">
+              <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+                ${product.price.toLocaleString('es-AR')}
+              </span>
+              <span style={{ fontWeight: 'bold', color: 'green' }}>
+                ${product.discountedPrice.toLocaleString('es-AR')}
+              </span>
+            </p>
+          ) : (
+            <p className="product-price">
+              ${product.price.toLocaleString('es-AR')}
+            </p>
+          )}
+          <p className="product-stock">Stock: {product.stock}</p>
+          {product.installment && (
+            <p className="installment">
+              3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}
+            </p>
+          )}
+        </a>
+      </Link>
 
-                {isAdmin && (
-                  <>
-                  
-                    <button className="btn btn-buy" onClick={() => handleEditProduct(product._id)}>Editar</button>
-                    <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
-                  </>
-                )}
-                 <button
-                 className="btn btn-buy"
-                  onClick={() => handleAddToCart(product._id, 1)} // Llamada a la función para agregar al carrito
-                >
-                  Comprar
-                </button>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="product-buttons">
+        {isAdmin && (
+          <>
+            <button className="btn btn-buy" onClick={() => handleEditProduct(product._id)}>Editar</button>
+            <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
+          </>
+        )}
+        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Comprar</button>
+      </div>
+    </div>
+  ))}
+</div>
         </main>
 
         

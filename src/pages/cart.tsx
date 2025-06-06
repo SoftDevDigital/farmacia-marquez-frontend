@@ -154,7 +154,7 @@ const CartPage: FC = () => {
         await fetchCartCount(); // ✅ ACTUALIZA el contador
       }
       if (response.status === 200) {
-        alert('Producto eliminado del carrito');
+        
       } else {
         alert('Hubo un problema al eliminar el producto');
       }
@@ -182,7 +182,7 @@ const CartPage: FC = () => {
       });
   
       if (response.status === 200) {
-        alert('Carrito limpiado con éxito');
+        
         await fetchCartCount(); // actualiza contador del ícono
       } else {
         alert('Hubo un problema al limpiar el carrito');
@@ -297,6 +297,7 @@ const CartPage: FC = () => {
                         <img
                           src={product.imageUrl || '/default-image.jpg'}
                           alt={product.name}
+                          data-product-id={product._id}
                           className="cart-item-image"
                         />
                         <div className="cart-item-info">

@@ -5,6 +5,8 @@ import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -118,14 +120,13 @@ const Login = () => {
                   required
                 />
                 <button
-                
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle btn btn-buy"
-                  
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  className="password-toggle-icon"
+  aria-label="Mostrar/Ocultar contraseña"
+>
+  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+</button>
               </div>
               <Link href="/forgot-password" className="forgot-password">
                 ¿Olvidaste tu contraseña?

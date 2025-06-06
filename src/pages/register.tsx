@@ -4,6 +4,8 @@ import Link from 'next/link';
 import axios from 'axios'; // Importar axios para hacer la solicitud
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -112,12 +114,13 @@ const Register = () => {
                   required
                 />
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle btn btn-buy" 
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  className="password-toggle-icon"
+  aria-label="Mostrar/Ocultar contraseña"
+>
+  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+</button>
               </div>
             </div>
 
@@ -134,14 +137,13 @@ const Register = () => {
                   required
                 />
                 <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="password-toggle c" 
-                
-                >
-                  
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </button>
+  type="button"
+  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+  className="password-toggle-icon"
+  aria-label="Mostrar/Ocultar confirmar contraseña"
+>
+  {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+</button>
               </div>
             </div>
 

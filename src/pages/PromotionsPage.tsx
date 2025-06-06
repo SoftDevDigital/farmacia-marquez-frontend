@@ -428,7 +428,7 @@ const PromotionsPage = () => {
                 <option value="PERCENTAGE">Porcentaje</option>
                 <option value="FIXED">Monto Fijo</option>
                 <option value="BUNDLE">Oferta por Paquete</option>
-                <option value="NXN">NXN</option>
+                <option value="NXN">2x1</option>
                 <option value="PERCENT_SECOND">Porcentaje Segundo Producto</option>
               </select>
             </div>

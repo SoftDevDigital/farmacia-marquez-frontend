@@ -39,17 +39,16 @@ const ProductDetail = () => {
       router.push('/login');
       return;
     }
-  
+
     try {
       const response = await axios.post(
         'http://localhost:3000/cart/add',
         { productId: product._id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       if (response.status === 200) {
         alert('Producto agregado al carrito ✅');
-        // Opcional: router.push('/cart');
       } else {
         alert('No se pudo agregar al carrito.');
       }
@@ -62,64 +61,52 @@ const ProductDetail = () => {
   return (
     <>
       <Header onSearch={() => {}} />
-      <div className="product-detail-page" style={{ padding: '20px' }}>
-        {/* BREADCRUMB */}
-        
-
-        <div className="product-detail-container" style={{ display: 'flex', gap: '40px' }}>
-          {/* IMAGEN */}
-          <div style={{ flex: '1', textAlign: 'center' }}>
+      <div style={{ padding: '40px 20px', backgroundColor: '#f9f9f9' }}>
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '40px',
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          padding: '30px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+        }}>
+          <div style={{ flex: '1 1 300px', textAlign: 'center' }}>
             <img
               src={product.imageUrl || '/default-image.jpg'}
               alt={product.name}
-              style={{ maxWidth: '350px', height: 'auto', objectFit: 'contain' }}
+              style={{ maxWidth: '100%', height: 'auto', borderRadius: '10px', objectFit: 'contain' }}
             />
           </div>
 
-          {/* INFO */}
-          <div style={{ flex: '1' }}>
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '10px' }}>{product.name}</h1>
-            <p className="product-description">{product.description}</p>
-            {/* ESTRELLAS Y REVIEWS */}
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-             
-              
-            </div>
-
-            {/* PRECIO */}
-            <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '10px 0' }}>
+          <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px', color: '#111827' }}>
+              {product.name}
+            </h1>
+            <p style={{ fontSize: '16px', color: '#4B5563', marginBottom: '20px', lineHeight: '1.6' }}>
+              {product.description}
+            </p>
+            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#14b8a6', marginBottom: '24px' }}>
               ${product.price.toLocaleString('es-AR')}
             </p>
-           
-
-       
-           
-             
-              
-
             <button
-  onClick={handleAddToCart}
-  style={{
-    backgroundColor: '#14b8a6',
-    color: 'white',
-    fontSize: '16px',
-    padding: '12px 24px',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    width: '100%',
-  }}
->
-  COMPRAR
-</button>
-
-              
-              
-              </div>
-            </div>
+              onClick={handleAddToCart}
+              style={{
+                backgroundColor: '#14b8a6',
+                color: 'white',
+                fontSize: '16px',
+                padding: '14px 0',
+                border: 'none',
+                borderRadius: '9999px',
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
+            >
+              COMPRAR
+            </button>
           </div>
-        
-      
+        </div>
+      </div>
       <Footer />
     </>
   );

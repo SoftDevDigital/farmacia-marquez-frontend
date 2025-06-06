@@ -87,8 +87,8 @@ const handleResultClick = (productId: string) => {
     <header className="header">
       <div className="header-top">
       <Link href="/" className="logo" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-  <img src="/farmacia.jpg" alt="Farmacia Curva Roces Logo" className="logo-img" />
-  <span className="logo-text">Farmacia Curva Roces</span>
+  <img src="/farmacia.png" alt="Farmacia Marquez City Logo" className="logo-img" />
+  <span className="logo-text">Farmacia Marquez City</span>
 </Link>
 <div className="search-bar" style={{ position: 'relative' }}>
           <input
@@ -160,10 +160,10 @@ const handleResultClick = (productId: string) => {
   </>
 )}
 
-          <Link href="/cart" className="cart">
-          <span role="img" aria-label="cart">🛒</span>
-          <span className="cart-count">{cartCount}</span> 
-        </Link>
+<Link href="/cart" className="cart">
+  <span className="cart-icon" role="img" aria-label="cart">🛒</span>
+  <span className="cart-count">{cartCount}</span> 
+</Link>
         </div>
       </div>
 

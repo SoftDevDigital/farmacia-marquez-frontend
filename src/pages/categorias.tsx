@@ -5,6 +5,9 @@ import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
 import { useCart } from '@/context/CartContext';
+import Link from 'next/link';
+
+
 
 const Categories: FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -17,7 +20,7 @@ const Categories: FC = () => {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const router = useRouter();
   const { fetchCartCount } = useCart();
-
+const [priceFrom, setPriceFrom] = useState<string>('');
   
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -43,15 +46,21 @@ const Categories: FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedCategory) return;
-    const url = selectedSubcategory
-      ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
-      : `http://localhost:3000/products?categoryId=${selectedCategory}`;
+  if (!selectedCategory) return;
 
-    axios.get(url)
-      .then(res => setProducts(res.data))
-      .catch(() => setError('Error al cargar los productos filtrados'));
-  }, [selectedCategory, selectedSubcategory]);
+  const url = selectedSubcategory
+    ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
+    : `http://localhost:3000/products?categoryId=${selectedCategory}`;
+
+  axios.get(url)
+    .then(res => {
+      const filtered = res.data.filter((p: any) =>
+        priceFrom !== '' ? p.price >= parseInt(priceFrom) : true
+      );
+      setProducts(filtered);
+    })
+    .catch(() => setError('Error al cargar los productos filtrados'));
+}, [selectedCategory, selectedSubcategory, priceFrom]);
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
@@ -185,7 +194,7 @@ const Categories: FC = () => {
       <div className="categories-page">
         <div className="sidebar">
           <h3>Categorías</h3>
-          <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select">
+          <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select select-categoria">
             <option value="">Selecciona una categoría</option>
             {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
           </select>
@@ -195,31 +204,54 @@ const Categories: FC = () => {
               <option key={sub._id} value={sub._id}>{sub.name}</option>
             ))}
           </select>
+          <h3>Filtrar por</h3>
+<h4>Precio</h4>
+<div className="price-filter">
+  <label>Desde</label>
+  <input
+    type="number"
+    placeholder="Precio desde"
+    value={priceFrom}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (/^\d*$/.test(value)) setPriceFrom(value);
+    }}
+  />
+</div>
         </div>
 
         <div className="product-grid">
-          <h2>Productos</h2>
-          {error && <p className="error-message">{error}</p>}
-          <div className="category-list">
-            {products.map(prod => (
-              <div key={prod._id} className="product-card">
-                <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" />
-                <h3>{prod.name}</h3>
-                <p>{prod.description}</p>
-                <p className="product-price">
-                  {prod.discountedPrice !== undefined && prod.discountedPrice < prod.price ? (
-                    <>
-                      <span style={{ textDecoration: 'line-through', color: 'gray' }}>${prod.price.toLocaleString('es-AR')}</span>
-                      <span style={{ fontWeight: 'bold', color: 'green' }}> ${prod.discountedPrice.toLocaleString('es-AR')}</span>
-                    </>
-                  ) : `$${prod.price.toLocaleString('es-AR')}`}
-                </p>
-                <p>Stock: {prod.stock}</p>
-                <button className="btn btn-buy" onClick={() => handleAddToCart(prod._id)}>Comprar</button>
-              </div>
-            ))}
-          </div>
-        </div>
+  <h2>Productos</h2>
+  {error && <p className="error-message">{error}</p>}
+  <div className="category-list">
+    {products.map((prod) => (
+      <div key={prod._id} className="product-card">
+        <Link href={`/products/${prod._id}`} passHref legacyBehavior>
+          <a style={{ textDecoration: 'none', color: 'inherit' }}>
+            <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" />
+            <h3>{prod.name}</h3>
+            <p>
+              {prod.description.length > 40
+                ? prod.description.slice(0, 40) + '...'
+                : prod.description}
+            </p>
+            <p className="product-price">
+              {prod.discountedPrice !== undefined && prod.discountedPrice < prod.price ? (
+                <>
+                  <span style={{ textDecoration: 'line-through', color: 'gray' }}>${prod.price.toLocaleString('es-AR')}</span>
+                  <span style={{ fontWeight: 'bold', color: 'green' }}> ${prod.discountedPrice.toLocaleString('es-AR')}</span>
+                </>
+              ) : `$${prod.price.toLocaleString('es-AR')}`}
+            </p>
+            <p>Stock: {prod.stock}</p>
+          </a>
+        </Link>
+        <button className="btn btn-buy" onClick={() => handleAddToCart(prod._id)}>Comprar</button>
+      </div>
+    ))}
+  </div>
+</div>
+
       </div>
 
       {isAdmin && (
@@ -241,22 +273,23 @@ const Categories: FC = () => {
         </div>
       )}
 
-      <div className="brand-list">
-        {categories.map((cat) => (
-          <div key={cat._id} className="brand-card">
-            <h3>{cat.name}</h3>
-            {isAdmin && (
-              <div className="brand-buttons">
-                <button className="btn btn-edit" onClick={() => {
-                  setCategoryData({ name: cat.name, subcategories: cat.subcategories.map((sub: any) => ({ ...sub })) });
-                  setEditingCategory(cat._id);
-                }}>Editar Categoría</button>
-                <button className="btn btn-delete" onClick={() => handleDeleteCategory(cat._id)}>Eliminar Categoría</button>
-              </div>
-            )}
-          </div>
-        ))}
+      {isAdmin && (
+  <div className="brand-list">
+    {categories.map((cat) => (
+      <div key={cat._id} className="brand-card">
+        <h3>{cat.name}</h3>
+        <div className="brand-buttons">
+          <button className="btn btn-edit" onClick={() => {
+            setCategoryData({ name: cat.name, subcategories: cat.subcategories.map((sub: any) => ({ ...sub })) });
+            setEditingCategory(cat._id);
+          }}>Editar Categoría</button>
+          <button className="btn btn-delete" onClick={() => handleDeleteCategory(cat._id)}>Eliminar Categoría</button>
+        </div>
       </div>
+    ))}
+  </div>
+)}
+     
       <Footer />
     </div>
   );

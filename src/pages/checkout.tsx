@@ -21,7 +21,7 @@ const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     country: '',
     additionalNotes: ''
   });
-
+const [errors, setErrors] = useState<{ [key: string]: string }>({});
   useEffect(() => {
     const fetchCartAndSelection = async () => {
       const token = localStorage.getItem('USER_TOKEN');
@@ -56,31 +56,38 @@ const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
   const handleCheckout = async () => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      alert('No estás autenticado');
-      return;
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('No estás autenticado');
+    return;
+  }
+
+  const requiredFields = [
+    'recipientName',
+    'phoneNumber',
+    'documentNumber',
+    'street',
+    'streetNumber',
+    'city',
+    'state',
+    'postalCode',
+    'country',
+  ];
+
+  const newErrors: { [key: string]: string } = {};
+
+  requiredFields.forEach((field) => {
+    if (!shippingInfo[field as keyof typeof shippingInfo]?.trim()) {
+      newErrors[field] = 'Debés completar este campo.';
     }
-  
-    // Validación de campos obligatorios
-    const requiredFields = [
-      'recipientName',
-      'phoneNumber',
-      'documentNumber',
-      'street',
-      'streetNumber',
-      'city',
-      'state',
-      'postalCode',
-      'country',
-    ];
-  
-    const missingFields = requiredFields.filter((field) => !shippingInfo[field as keyof typeof shippingInfo]);
-  
-    if (missingFields.length > 0) {
-      alert('Todos los campos son obligatorios menos los campos de departamento y notas adiccionales.');
-      return;
-    }
+  });
+
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length > 0) {
+    return; // no sigue si hay errores
+  }
+
   
     try {
       const selectedItems = selectedProductIds.length > 0
@@ -138,50 +145,143 @@ const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
       <Header />
       <div className="checkout-container">
         <h2>Información de Envío</h2>
-        <form className="shipping-form">
+       <form className="shipping-form">
   <div className="form-group">
     <label htmlFor="recipientName">Nombre:</label>
-    <input type="text" id="recipientName" name="recipientName" value={shippingInfo.recipientName} onChange={handleChange} required />
+    <input
+      type="text"
+      id="recipientName"
+      name="recipientName"
+      value={shippingInfo.recipientName}
+      onChange={handleChange}
+      className={errors.recipientName ? 'input-error' : ''}
+    />
+    {errors.recipientName && <p className="error-message">{errors.recipientName}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="phoneNumber">Teléfono:</label>
-    <input type="text" id="phoneNumber" name="phoneNumber" value={shippingInfo.phoneNumber} onChange={handleChange} required />
+    <input
+      type="text"
+      id="phoneNumber"
+      name="phoneNumber"
+      value={shippingInfo.phoneNumber}
+      onChange={handleChange}
+      className={errors.phoneNumber ? 'input-error' : ''}
+    />
+    {errors.phoneNumber && <p className="error-message">{errors.phoneNumber}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="documentNumber">Documento:</label>
-    <input type="text" id="documentNumber" name="documentNumber" value={shippingInfo.documentNumber} onChange={handleChange} required />
+    <input
+      type="text"
+      id="documentNumber"
+      name="documentNumber"
+      value={shippingInfo.documentNumber}
+      onChange={handleChange}
+      className={errors.documentNumber ? 'input-error' : ''}
+    />
+    {errors.documentNumber && <p className="error-message">{errors.documentNumber}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="street">Dirección:</label>
-    <input type="text" id="street" name="street" value={shippingInfo.street} onChange={handleChange} required />
+    <input
+      type="text"
+      id="street"
+      name="street"
+      value={shippingInfo.street}
+      onChange={handleChange}
+      className={errors.street ? 'input-error' : ''}
+    />
+    {errors.street && <p className="error-message">{errors.street}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="streetNumber">Número:</label>
-    <input type="text" id="streetNumber" name="streetNumber" value={shippingInfo.streetNumber} onChange={handleChange} required />
+    <input
+      type="text"
+      id="streetNumber"
+      name="streetNumber"
+      value={shippingInfo.streetNumber}
+      onChange={handleChange}
+      className={errors.streetNumber ? 'input-error' : ''}
+    />
+    {errors.streetNumber && <p className="error-message">{errors.streetNumber}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="apartment">Departamento:</label>
-    <input type="text" id="apartment" name="apartment" value={shippingInfo.apartment} onChange={handleChange} />
+    <input
+      type="text"
+      id="apartment"
+      name="apartment"
+      value={shippingInfo.apartment}
+      onChange={handleChange}
+    />
   </div>
+
   <div className="form-group">
     <label htmlFor="city">Ciudad:</label>
-    <input type="text" id="city" name="city" value={shippingInfo.city} onChange={handleChange} required />
+    <input
+      type="text"
+      id="city"
+      name="city"
+      value={shippingInfo.city}
+      onChange={handleChange}
+      className={errors.city ? 'input-error' : ''}
+    />
+    {errors.city && <p className="error-message">{errors.city}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="state">Provincia:</label>
-    <input type="text" id="state" name="state" value={shippingInfo.state} onChange={handleChange} required />
+    <input
+      type="text"
+      id="state"
+      name="state"
+      value={shippingInfo.state}
+      onChange={handleChange}
+      className={errors.state ? 'input-error' : ''}
+    />
+    {errors.state && <p className="error-message">{errors.state}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="postalCode">Código Postal:</label>
-    <input type="text" id="postalCode" name="postalCode" value={shippingInfo.postalCode} onChange={handleChange} required />
+    <input
+      type="text"
+      id="postalCode"
+      name="postalCode"
+      value={shippingInfo.postalCode}
+      onChange={handleChange}
+      className={errors.postalCode ? 'input-error' : ''}
+    />
+    {errors.postalCode && <p className="error-message">{errors.postalCode}</p>}
   </div>
+
   <div className="form-group">
     <label htmlFor="country">País:</label>
-    <input type="text" id="country" name="country" value={shippingInfo.country} onChange={handleChange} required />
+    <input
+      type="text"
+      id="country"
+      name="country"
+      value={shippingInfo.country}
+      onChange={handleChange}
+      className={errors.country ? 'input-error' : ''}
+    />
+    {errors.country && <p className="error-message">{errors.country}</p>}
   </div>
+
   <div className="form-group full-width">
     <label htmlFor="additionalNotes">Notas adicionales:</label>
-    <textarea id="additionalNotes" name="additionalNotes" value={shippingInfo.additionalNotes} onChange={handleChange} />
+    <textarea
+      id="additionalNotes"
+      name="additionalNotes"
+      value={shippingInfo.additionalNotes}
+      onChange={handleChange}
+    />
   </div>
 </form>
         <button className="btn btn-buy" onClick={handleCheckout}>

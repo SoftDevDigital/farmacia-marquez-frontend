@@ -4,6 +4,7 @@ import jwt_decode from 'jwt-decode';  // Para verificar el rol
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import Link from 'next/link';
 
 
 const Marcas: FC = () => {
@@ -242,7 +243,7 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
           <input 
   id="priceFrom" 
   type="number" 
-  placeholder="Desde"
+  placeholder="Precio desde"
   value={priceFrom}
   onChange={(e) => {
     const value = e.target.value;
@@ -256,7 +257,7 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
 
         <main className="product-grid">
           <div className="grid-header">
-            <h1>Marcas</h1>
+            <h1>Productos</h1>
             <div className="sort-options">
               <span>↑↓ Ordenar</span>
             </div>
@@ -265,28 +266,28 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
           <div className="products">
           {filteredProducts.map((product) => (
   <div key={product._id} className="product-card">
-   
-    <img src={product.imageUrl || '/default-image.jpg'} alt={product.name} className="product-image" />
-    <h3 className="product-name">{product.name}</h3>
-    <p className="product-description">{product.description}</p>
-    {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
-  <p className="product-price">
-    <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
-      ${product.price.toLocaleString('es-AR')}
-    </span>
-    <span style={{ fontWeight: 'bold', color: 'green' }}>
-      ${product.discountedPrice.toLocaleString('es-AR')}
-    </span>
-  </p>
-) : (
-  <p className="product-price">
-    ${product.price.toLocaleString('es-AR')}
-  </p>
-)}
-
-    <p className="product-stock">Stock: {product.stock}</p>
-
-   
+    <Link href={`/products/${product._id}`} passHref legacyBehavior>
+      <a style={{ textDecoration: 'none', color: 'inherit' }}>
+        <img src={product.imageUrl || '/default-image.jpg'} alt={product.name} data-product-id={product._id} className="product-image" />
+        <h3 className="product-name">{product.name}</h3>
+        <p className="product-description">{product.description}</p>
+        {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+          <p className="product-price">
+            <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+              ${product.price.toLocaleString('es-AR')}
+            </span>
+            <span style={{ fontWeight: 'bold', color: 'green' }}>
+              ${product.discountedPrice.toLocaleString('es-AR')}
+            </span>
+          </p>
+        ) : (
+          <p className="product-price">
+            ${product.price.toLocaleString('es-AR')}
+          </p>
+        )}
+        <p className="product-stock">Stock: {product.stock}</p>
+      </a>
+    </Link>
     <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
   </div>
 ))}
@@ -312,23 +313,24 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
           </div>
         )}
 
-        <div className="brand-list">
-          {brands.length > 0 ? (
-            brands.map((brand) => (
-              <div key={brand._id} className="brand-card">
-                <h3>{brand.name}</h3>
-                {isAdmin && (
-                  <div className="brand-buttons">
-                    <button className="btn btn-edit" onClick={() => handleEdit(brand._id)}>Editar Marca</button>
-                    <button  className="btn btn-delete" onClick={() => handleDelete(brand._id)}>Eliminar Marca</button>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <p>No hay marcas disponibles.</p>
-          )}
-      </div>
+       {isAdmin && (
+  <div className="brand-list">
+    {brands.length > 0 ? (
+      brands.map((brand) => (
+        <div key={brand._id} className="brand-card">
+          <h3>{brand.name}</h3>
+          <div className="brand-buttons">
+            <button className="btn btn-edit" onClick={() => handleEdit(brand._id)}>Editar Marca</button>
+            <button className="btn btn-delete" onClick={() => handleDelete(brand._id)}>Eliminar Marca</button>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p>No hay marcas disponibles.</p>
+    )}
+  </div>
+)}
+     
       <Footer />
     </div>
   );
