@@ -39,29 +39,34 @@ const [priceFrom, setPriceFrom] = useState<string>('');
       .catch(() => setError('Error al cargar las categorías'));
   }, []);
 
-  useEffect(() => {
-    axios.get('http://localhost:3000/products')
-      .then(res => setProducts(res.data))
-      .catch(() => setError('Error al cargar los productos'));
-  }, []);
 
-  useEffect(() => {
-  if (!selectedCategory) return;
+ useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      let url = 'http://localhost:3000/products';
 
-  const url = selectedSubcategory
-    ? `http://localhost:3000/products?categoryId=${selectedCategory}&subcategoryId=${selectedSubcategory}`
-    : `http://localhost:3000/products?categoryId=${selectedCategory}`;
+      // Si hay categoría seleccionada, agregamos el filtro
+      if (selectedCategory) {
+        url += `?categoryId=${selectedCategory}`;
 
-  axios.get(url)
-    .then(res => {
-      const filtered = res.data.filter((p: any) =>
-        priceFrom !== '' ? p.price >= parseInt(priceFrom) : true
-      );
+        if (selectedSubcategory) {
+          url += `&subcategoryId=${selectedSubcategory}`;
+        }
+      }
+
+      const res = await axios.get(url);
+      const filtered = priceFrom !== ''
+        ? res.data.filter((p: any) => p.price >= parseInt(priceFrom))
+        : res.data;
+
       setProducts(filtered);
-    })
-    .catch(() => setError('Error al cargar los productos filtrados'));
-}, [selectedCategory, selectedSubcategory, priceFrom]);
+    } catch (err) {
+      setError('Error al cargar los productos');
+    }
+  };
 
+  fetchProducts();
+}, [selectedCategory, selectedSubcategory, priceFrom]);
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
     setSelectedSubcategory('');
@@ -198,12 +203,21 @@ const [priceFrom, setPriceFrom] = useState<string>('');
             <option value="">Selecciona una categoría</option>
             {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
           </select>
-          <select value={selectedSubcategory} onChange={handleFilterSubcategoryChange} className="filter-select" disabled={!selectedCategory}>
-            <option value="">Selecciona una subcategoría</option>
-            {selectedCategory && categories.find(c => c._id === selectedCategory)?.subcategories.map((sub: any) => (
-              <option key={sub._id} value={sub._id}>{sub.name}</option>
-            ))}
-          </select>
+         {selectedCategory && (
+  <>
+    <h3>Subcategorías</h3>
+    <select
+      value={selectedSubcategory}
+      onChange={handleFilterSubcategoryChange}
+      className="filter-select"
+    >
+      <option value="">Selecciona una subcategoría</option>
+      {categories.find(c => c._id === selectedCategory)?.subcategories.map((sub: any) => (
+        <option key={sub._id} value={sub._id}>{sub.name}</option>
+      ))}
+    </select>
+  </>
+)}
           <h3>Filtrar por</h3>
 <h4>Precio</h4>
 <div className="price-filter">

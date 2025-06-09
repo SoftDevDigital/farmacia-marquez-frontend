@@ -215,24 +215,32 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
         <aside className="sidebar">
 
         <h3>Marca</h3>
-          <select className="filter-select" onChange={(e) => setSelectedBrand(e.target.value)} value={selectedBrand}>
-            <option>Marca</option>
-            {filteredBrands.map((brand) => (
-              <option key={brand._id} value={brand._id}>
-                {brand.name}
-              </option>
-            ))}
-          </select>
+         <select
+  className="filter-select"
+  onChange={(e) => setSelectedBrand(e.target.value)}
+  value={selectedBrand}
+>
+  <option value="">Todas las marcas</option>
+  {filteredBrands.map((brand) => (
+    <option key={brand._id} value={brand._id}>
+      {brand.name}
+    </option>
+  ))}
+</select>
           
           <h2>Categorías</h2>
-          <select className="filter-select" onChange={(e) => setSelectedCategory(e.target.value)}>
-            <option>Categorías</option>
-            {categories.map((category) => (
-              <option key={category._id} value={category._id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+        <select
+  className="filter-select"
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+>
+  <option value="">Todas las categorías</option>
+  {categories.map((category) => (
+    <option key={category._id} value={category._id}>
+      {category.name}
+    </option>
+  ))}
+</select>
 
          
 

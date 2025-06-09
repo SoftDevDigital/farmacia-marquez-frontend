@@ -6,10 +6,20 @@ const SuccessPage = () => {
   const router = useRouter();
   const { status, detail, orderId } = router.query;
 
-  useEffect(() => {
-    if (!status || !detail || !orderId) return;
-    console.log('Pago recibido:', { status, detail, orderId });
-  }, [status, detail, orderId]);
+ useEffect(() => {
+  if (!status || !detail || !orderId) return;
+
+  console.log('Pago recibido:', { status, detail, orderId });
+
+  if (status === 'approved') {
+    // Redirige automáticamente a /orders después de 3 segundos
+    const timeout = setTimeout(() => {
+      router.push('/orders');
+    }, 3000);
+
+    return () => clearTimeout(timeout); // limpieza en caso de desmontaje
+  }
+}, [status, detail, orderId, router]);
 
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
