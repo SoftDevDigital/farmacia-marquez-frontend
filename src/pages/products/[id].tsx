@@ -17,7 +17,7 @@ const ProductDetail = () => {
 
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/products/${id}`);
+        const res = await axios.get(`http://localhost:3003/products/${id}`);
         setProduct(res.data);
       } catch (err) {
         setError('Producto no encontrado');
@@ -42,7 +42,7 @@ const ProductDetail = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/cart/add',
+        'http://localhost:3003/cart/add',
         { productId: product._id, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );

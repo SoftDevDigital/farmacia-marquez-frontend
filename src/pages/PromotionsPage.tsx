@@ -43,7 +43,7 @@ const PromotionsPage = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/promotions');
+        const response = await axios.get('http://localhost:3003/promotions');
         setPromotions(response.data);
       } catch (error) {
         setError('Error al cargar las promociones');
@@ -77,7 +77,7 @@ const PromotionsPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/products');
+        const response = await axios.get('http://localhost:3003/products');
         setProducts(response.data);
       } catch (error) {
         setError('Error al cargar los productos');
@@ -127,7 +127,7 @@ const PromotionsPage = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:3000/promotions',
+        'http://localhost:3003/promotions',
         preparedPromotion,
         {
           headers: {
@@ -177,7 +177,7 @@ const PromotionsPage = () => {
   
     try {
       const response = await axios.patch(
-        `http://localhost:3000/promotions/${promotionData._id}`,
+        `http://localhost:3003/promotions/${promotionData._id}`,
         updatedPromotionData,
         {
           headers: {
@@ -236,7 +236,7 @@ const PromotionsPage = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:3000/promotions/${promotionId}`, {
+      const response = await axios.delete(`http://localhost:3003/promotions/${promotionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

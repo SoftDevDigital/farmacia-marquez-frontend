@@ -11,7 +11,7 @@ const OrdersPage = () => {
 useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/products');
+      const res = await axios.get('http://localhost:3003/products');
       setProducts(res.data);
     } catch (err) {
       console.error('Error al cargar productos', err);
@@ -26,7 +26,7 @@ useEffect(() => {
       const token = localStorage.getItem('USER_TOKEN');  
 
       try {
-        const response = await axios.get('http://localhost:3000/orders', {
+        const response = await axios.get('http://localhost:3003/orders', {
           headers: {
             Authorization: `Bearer ${token}`  
           }

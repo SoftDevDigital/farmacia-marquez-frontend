@@ -41,9 +41,9 @@ const Marcas: FC = () => {
   useEffect(() => {
     const fetchCategoriesAndProductsAndBrands = async () => {
       try {
-        const categoryResponse = await axios.get('http://localhost:3000/categories');
-        const productResponse = await axios.get('http://localhost:3000/products');
-        const brandResponse = await axios.get('http://localhost:3000/brands');
+        const categoryResponse = await axios.get('http://localhost:3003/categories');
+        const productResponse = await axios.get('http://localhost:3003/products');
+        const brandResponse = await axios.get('http://localhost:3003/brands');
         
         setCategories(categoryResponse.data);
         setProducts(productResponse.data);
@@ -60,7 +60,7 @@ const Marcas: FC = () => {
   const handleDelete = async (brandId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
-      const res = await axios.delete(`http://localhost:3000/brands/${brandId}`, {
+      const res = await axios.delete(`http://localhost:3003/brands/${brandId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const Marcas: FC = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:3000/brands',
+        'http://localhost:3003/brands',
         { name: brandName },
         {
           headers: {
@@ -130,7 +130,7 @@ const Marcas: FC = () => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
       const res = await axios.patch(
-        `http://localhost:3000/brands/${editingBrand}`,
+        `http://localhost:3003/brands/${editingBrand}`,
         { name: brandName },
         {
           headers: {
@@ -181,7 +181,7 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
   
     try {
       const response = await axios.post(
-        'http://localhost:3000/cart/add',
+        'http://localhost:3003/cart/add',
         {
           productId,
           quantity: 1,

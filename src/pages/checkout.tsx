@@ -28,7 +28,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       if (!token) return;
   
       try {
-        const cartResponse = await axios.get('http://localhost:3000/cart', {
+        const cartResponse = await axios.get('http://localhost:3003/cart', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCart(cartResponse.data);
@@ -100,7 +100,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       }
   
       const shippingResponse = await axios.post(
-        'http://localhost:3000/users/shipping-info',
+        'http://localhost:3003/users/shipping-info',
         shippingInfo,
         {
           headers: {
@@ -112,7 +112,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
   
       if (shippingResponse.status === 200 || shippingResponse.status === 201) {
         const paymentResponse = await axios.post(
-          'http://localhost:3000/payments/checkout',
+          'http://localhost:3003/payments/checkout',
           {
             selectedProductIds: selectedItems.map((item: any) => item.productId),
           },

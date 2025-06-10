@@ -54,7 +54,7 @@ const AffiliatesPage = () => {
         setIsAdmin(true);
 
         // Realizamos la solicitud para obtener los afiliados
-        const response = await axios.get('http://localhost:3000/affiliates', {
+        const response = await axios.get('http://localhost:3003/affiliates', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -106,7 +106,7 @@ const AffiliatesPage = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:3000/affiliates/${editingAffiliateId}`,
+        `http://localhost:3003/affiliates/${editingAffiliateId}`,
         affiliateData,
         {
           headers: {
@@ -165,7 +165,7 @@ const AffiliatesPage = () => {
   
     try {
       const response = await axios.delete(
-        `http://localhost:3000/affiliates/${affiliateId}`,
+        `http://localhost:3003/affiliates/${affiliateId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

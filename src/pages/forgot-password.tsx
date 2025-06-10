@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     
     try {
       // Hacer la solicitud POST al backend
-      const response = await fetch('http://localhost:3000/auth/forgot-password', {
+      const response = await fetch('http://localhost:3003/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

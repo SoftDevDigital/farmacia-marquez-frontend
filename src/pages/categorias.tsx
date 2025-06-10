@@ -34,7 +34,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/categories')
+    axios.get('http://localhost:3003/categories')
       .then(res => setCategories(res.data))
       .catch(() => setError('Error al cargar las categorías'));
   }, []);
@@ -43,7 +43,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      let url = 'http://localhost:3000/products';
+      let url = 'http://localhost:3003/products';
 
       // Si hay categoría seleccionada, agregamos el filtro
       if (selectedCategory) {
@@ -84,7 +84,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
       return alert('Completá todos los campos');
     }
     try {
-      const res = await axios.post('http://localhost:3000/categories', categoryData, {
+      const res = await axios.post('http://localhost:3003/categories', categoryData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 201) {
@@ -107,7 +107,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
         name: categoryData.name,
         subcategories: categoryData.subcategories.map(sub => sub._id ? { _id: sub._id, name: sub.name } : { name: sub.name })
       };
-      const res = await axios.patch(`http://localhost:3000/categories/${editingCategory}`, payload, {
+      const res = await axios.patch(`http://localhost:3003/categories/${editingCategory}`, payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 200) {
@@ -128,7 +128,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
     if (!token) return alert('No estás autenticado');
   
     try {
-      const res = await axios.delete(`http://localhost:3000/categories/${id}`, {
+      const res = await axios.delete(`http://localhost:3003/categories/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   
     try {
       const response = await axios.post(
-        'http://localhost:3000/cart/add',
+        'http://localhost:3003/cart/add',
         {
           productId,
           quantity: 1,

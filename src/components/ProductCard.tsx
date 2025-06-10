@@ -55,10 +55,10 @@ const Products: FC = () => {
   useEffect(() => {
     const fetchCategoriesAndProductsAndBrands = async () => {
       try {
-        const categoryResponse = await axios.get('http://localhost:3000/categories');
-        const productResponse = await axios.get('http://localhost:3000/products');
+        const categoryResponse = await axios.get('http://localhost:3003/categories');
+        const productResponse = await axios.get('http://localhost:3003/products');
         console.log('prodcutos',productResponse);
-        const brandResponse = await axios.get('http://localhost:3000/brands');
+        const brandResponse = await axios.get('http://localhost:3003/brands');
 
         setCategories(categoryResponse.data);
         setProducts(productResponse.data);
@@ -104,7 +104,7 @@ const Products: FC = () => {
     };
   
     try {
-      const res = await axios.post('http://localhost:3000/products', preparedProduct, {
+      const res = await axios.post('http://localhost:3003/products', preparedProduct, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ const Products: FC = () => {
     };
     try {
       const res = await axios.patch(
-        `http://localhost:3000/products/${editingProduct}`,
+        `http://localhost:3003/products/${editingProduct}`,
         preparedProduct,
         {
           headers: {
@@ -252,7 +252,7 @@ const Products: FC = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:3000/cart/add',
+        'http://localhost:3003/cart/add',
         {
           productId,
           quantity: finalQuantity,
@@ -315,7 +315,7 @@ if (productImage && cartIcon) {
   const handleDeleteProduct = async (productId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
-      const res = await axios.delete(`http://localhost:3000/products/${productId}`, {
+      const res = await axios.delete(`http://localhost:3003/products/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
