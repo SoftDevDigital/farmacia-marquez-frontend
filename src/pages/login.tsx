@@ -19,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     if (email && password) {
       try {
-        const response = await axios.post('http://localhost:3003/auth/login', {
+        const response = await axios.post('http://localhost:3002/auth/login', {
           email: email,
           password: password,
         });
@@ -53,7 +53,7 @@ const Login = () => {
 
     // Abre el popup para el login con Google
     window.open(
-      'http://localhost:3003/auth/google',
+      'http://localhost:3002/auth/google',
       'google_login',
       `width=${width},height=${height},top=${top},left=${left}`
     );
@@ -62,7 +62,7 @@ const Login = () => {
   // Escuchar mensajes del popup de Google
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'http://localhost:3003') return; // Verificar la fuente
+      if (event.origin !== 'http://localhost:3002') return; // Verificar la fuente
 
       const { accessToken, redirectUrl, error } = event.data;
 
@@ -87,7 +87,7 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <Header />
+      <Header onSearch={() => {}} />
       <div className="login-container">
         <div className="login-form">
           <h2 className="login-title">Iniciá sesión</h2>

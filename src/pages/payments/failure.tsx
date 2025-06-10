@@ -16,7 +16,7 @@ const PaymentFailure = () => {
 
   return (
     <>
-      <Header />
+      <Header onSearch={() => {}} />
       <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
         <h1>❌ Pago Rechazado</h1>
         <p>Tu pago no pudo ser procesado.</p>

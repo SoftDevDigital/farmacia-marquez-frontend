@@ -35,7 +35,7 @@ const Register = () => {
 
     try {
      
-      const response = await axios.post('http://localhost:3003/auth/register', {
+      const response = await axios.post('http://localhost:3002/auth/register', {
         email: email,
         password: password,
         firstName: name.split(' ')[0], 
@@ -59,7 +59,7 @@ const Register = () => {
   return (
     <div className="register-page">
     
-      <Header />
+      <Header onSearch={() => {}} />
 
       <div className="register-container">
         <div className="register-form">

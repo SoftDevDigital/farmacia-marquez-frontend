@@ -5,21 +5,53 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const PromotionsPage = () => {
-  const [promotions, setPromotions] = useState([]);
+  type Promotion = {
+  _id: string;
+  title: string;
+  description: string;
+  discountPercentage?: number;
+  startDate: string;
+  endDate: string;
+  productIds: string[] | string;
+  type: string;
+  isActive: boolean;
+  discountAmount?: number;
+  discountPercentageSecond?: number;
+  buyQuantity?: number;
+  getQuantity?: number;
+};
+
+const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [error, setError] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false); 
-  const [promotionData, setPromotionData] = useState({
-    _id: '', 
-    title: '',
-    description: '',
-    discountPercentage: '',
-    startDate: '',
-    endDate: '',
-    productIds: [], 
-    type: 'PERCENTAGE', 
-    isActive: true,
-  });
+  type PromotionFormData = {
+  _id: string;
+  title: string;
+  description: string;
+  discountPercentage: string;
+  startDate: string;
+  endDate: string;
+  productIds: string[]; // <-- esto es clave
+  type: string;
+  isActive: boolean;
+  discountAmount?: number;
+  discountPercentageSecond?: number;
+  buyQuantity?: number;
+  getQuantity?: number;
+};
+
+const [promotionData, setPromotionData] = useState<PromotionFormData>({
+  _id: '',
+  title: '',
+  description: '',
+  discountPercentage: '',
+  startDate: '',
+  endDate: '',
+  productIds: [],
+  type: 'PERCENTAGE',
+  isActive: true,
+});
   const [quantity, setQuantity] = useState(0);  
   const [productPrice, setProductPrice] = useState(0);  
   const [calculatedDiscount, setCalculatedDiscount] = useState(null); 
@@ -43,7 +75,7 @@ const PromotionsPage = () => {
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const response = await axios.get('http://localhost:3003/promotions');
+        const response = await axios.get('http://localhost:3002/promotions');
         setPromotions(response.data);
       } catch (error) {
         setError('Error al cargar las promociones');
@@ -62,13 +94,13 @@ const PromotionsPage = () => {
         _id: promotion._id,
         title: promotion.title,
         description: promotion.description,
-        discountPercentage: promotion.discountPercentage,
+        discountPercentage: promotion.discountPercentage?.toString() || '',
         startDate: promotion.startDate.split('T')[0],
         endDate: promotion.endDate.split('T')[0],
        
         productIds: Array.isArray(promotion.productIds)
-          ? promotion.productIds.join(', ') 
-          : promotion.productIds,
+  ? promotion.productIds
+  : promotion.productIds?.split(',') || [],
         type: promotion.type,
         isActive: promotion.isActive,
       });
@@ -77,7 +109,7 @@ const PromotionsPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3003/products');
+        const response = await axios.get('http://localhost:3002/products');
         setProducts(response.data);
       } catch (error) {
         setError('Error al cargar los productos');
@@ -127,7 +159,7 @@ const PromotionsPage = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:3003/promotions',
+        'http://localhost:3002/promotions',
         preparedPromotion,
         {
           headers: {
@@ -170,14 +202,12 @@ const PromotionsPage = () => {
   
     const updatedPromotionData = {
       ...promotionData,
-      productIds: Array.isArray(promotionData.productIds)
-        ? promotionData.productIds 
-        : promotionData.productIds.split(',').map((id) => id.trim()), 
+   productIds: promotionData.productIds,
     };
   
     try {
       const response = await axios.patch(
-        `http://localhost:3003/promotions/${promotionData._id}`,
+        `http://localhost:3002/promotions/${promotionData._id}`,
         updatedPromotionData,
         {
           headers: {
@@ -198,7 +228,7 @@ const PromotionsPage = () => {
           _id: '',
           title: '',
           description: '',
-          discountPercentage: 0,
+          discountPercentage: '',
           startDate: '',
           endDate: '',
           productIds: [], 
@@ -236,7 +266,7 @@ const PromotionsPage = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:3003/promotions/${promotionId}`, {
+      const response = await axios.delete(`http://localhost:3002/promotions/${promotionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -265,7 +295,7 @@ const PromotionsPage = () => {
   
   return (
     <div>
-      <Header />
+      <Header onSearch={() => {}} />
       <h1>Promociones</h1>
       {error && <p>{error}</p>}
       <div>
@@ -280,8 +310,8 @@ const PromotionsPage = () => {
         {isAdmin && (
           <div className="promotion-buttons">
           <>
-            <button class="btn btn-buy" onClick={() => handleEditPromotion(promotion._id)}>Editar</button>
-            <button class="btn btn-buy" onClick={() => handleDeletePromotion(promotion._id)}>Eliminar</button>
+            <button className="btn btn-buy" onClick={() => handleEditPromotion(promotion._id)}>Editar</button>
+            <button className="btn btn-buy" onClick={() => handleDeletePromotion(promotion._id)}>Eliminar</button>
           </>
           </div>
         )}
@@ -392,7 +422,7 @@ const PromotionsPage = () => {
   onChange={(e) =>
     setPromotionData({
       ...promotionData,
-      discountPercentage: Number(e.target.value),
+       discountPercentage: e.target.value,
     })
   }
   required
@@ -468,7 +498,7 @@ const PromotionsPage = () => {
     ))}
   </select>
 </div>
-            <button class="btn btn-buy" type="submit">{promotionData._id ? 'Actualizar' : 'Crear'} Promoción</button>
+            <button className="btn btn-buy" type="submit">{promotionData._id ? 'Actualizar' : 'Crear'} Promoción</button>
           </form>
         </div>
       )}

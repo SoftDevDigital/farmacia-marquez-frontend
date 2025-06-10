@@ -10,7 +10,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) return;
     try {
-      const res = await axios.get('http://localhost:3003/cart', {
+      const res = await axios.get('http://localhost:3002/cart', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 200 && res.data.items) {

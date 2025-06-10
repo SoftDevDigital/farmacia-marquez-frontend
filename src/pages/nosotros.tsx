@@ -5,7 +5,7 @@ const Nosotros = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
     
-      <Header />
+      <Header onSearch={() => {}} />
 
     
       <div className="w-full max-w-7xl mx-auto py-8 px-4">

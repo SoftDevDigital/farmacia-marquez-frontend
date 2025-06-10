@@ -44,7 +44,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem('USER_TOKEN') || '';
       const response = await fetch(
-        `http://localhost:3003/products?search=${encodeURIComponent(searchTerm)}`,
+        `http://localhost:3002/products?search=${encodeURIComponent(searchTerm)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -55,10 +55,10 @@ const Products: FC = () => {
   useEffect(() => {
     const fetchCategoriesAndProductsAndBrands = async () => {
       try {
-        const categoryResponse = await axios.get('http://localhost:3003/categories');
-        const productResponse = await axios.get('http://localhost:3003/products');
+        const categoryResponse = await axios.get('http://localhost:3002/categories');
+        const productResponse = await axios.get('http://localhost:3002/products');
         console.log('prodcutos',productResponse);
-        const brandResponse = await axios.get('http://localhost:3003/brands');
+        const brandResponse = await axios.get('http://localhost:3002/brands');
 
         setCategories(categoryResponse.data);
         setProducts(productResponse.data);
@@ -104,7 +104,7 @@ const Products: FC = () => {
     };
   
     try {
-      const res = await axios.post('http://localhost:3003/products', preparedProduct, {
+      const res = await axios.post('http://localhost:3002/products', preparedProduct, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ const Products: FC = () => {
     };
     try {
       const res = await axios.patch(
-        `http://localhost:3003/products/${editingProduct}`,
+        `http://localhost:3002/products/${editingProduct}`,
         preparedProduct,
         {
           headers: {
@@ -190,17 +190,17 @@ const Products: FC = () => {
           )
         );
         setProductData({
-          name: '',
-          description: '',
-          price: 0,
-          discount: 0,
-          stock: 0,
-          imageUrl: '',
-          categoryId: '',
-          subcategoryId: '',
-          brandId: '',
-          isFeatured: false,
-        });
+  name: '',
+  description: '',
+  price: '',        // ← string
+  discount: '',     // ← string
+  stock: '',        // ← string
+  imageUrl: '',
+  categoryId: '',
+  subcategoryId: '',
+  brandId: '',
+  isFeatured: false,
+});
         setEditingProduct(null); // Resetear el estado de edición
       } else {
         alert('Hubo un problema al actualizar el producto');
@@ -252,7 +252,7 @@ const Products: FC = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:3003/cart/add',
+        'http://localhost:3002/cart/add',
         {
           productId,
           quantity: finalQuantity,
@@ -315,7 +315,7 @@ if (productImage && cartIcon) {
   const handleDeleteProduct = async (productId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
-      const res = await axios.delete(`http://localhost:3003/products/${productId}`, {
+      const res = await axios.delete(`http://localhost:3002/products/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

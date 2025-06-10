@@ -7,7 +7,7 @@ import PromoBanner from '../components/PromoBanner';
 const Home: FC = () => {
   return (
     <div>
-      <Header />
+      <Header onSearch={() => {}} />
       <PromoBanner />
       <div className="products-container">
         <ProductCard />

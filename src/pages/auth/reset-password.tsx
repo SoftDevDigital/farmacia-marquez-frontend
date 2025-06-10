@@ -26,7 +26,7 @@ const ResetPasswordPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3003/auth/reset-password', {
+      const response = await fetch('http://localhost:3002/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const ResetPasswordPage: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.resetPasswordPage}>
         <h2 className={styles.title}>Restablecer contraseña</h2>
-        <p classIng={styles.description}>
+        <p className={styles.description}>
           Ingresa tu nueva contraseña para restablecerla.
         </p>
         <form onSubmit={handleSubmit} className={styles.form}>

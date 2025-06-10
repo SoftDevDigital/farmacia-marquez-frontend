@@ -14,7 +14,13 @@ const Categories: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]); 
-  const [categoryData, setCategoryData] = useState({ name: '', subcategories: [{ name: '' }] });
+  const [categoryData, setCategoryData] = useState<{
+  name: string;
+  subcategories: { _id?: string; name: string }[];
+}>({
+  name: '',
+  subcategories: [{ name: '' }],
+});
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -34,7 +40,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:3003/categories')
+    axios.get('http://localhost:3002/categories')
       .then(res => setCategories(res.data))
       .catch(() => setError('Error al cargar las categorías'));
   }, []);
@@ -43,7 +49,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      let url = 'http://localhost:3003/products';
+      let url = 'http://localhost:3002/products';
 
       // Si hay categoría seleccionada, agregamos el filtro
       if (selectedCategory) {
@@ -84,7 +90,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
       return alert('Completá todos los campos');
     }
     try {
-      const res = await axios.post('http://localhost:3003/categories', categoryData, {
+      const res = await axios.post('http://localhost:3002/categories', categoryData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 201) {
@@ -107,7 +113,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
         name: categoryData.name,
         subcategories: categoryData.subcategories.map(sub => sub._id ? { _id: sub._id, name: sub.name } : { name: sub.name })
       };
-      const res = await axios.patch(`http://localhost:3003/categories/${editingCategory}`, payload, {
+      const res = await axios.patch(`http://localhost:3002/categories/${editingCategory}`, payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 200) {
@@ -128,7 +134,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
     if (!token) return alert('No estás autenticado');
   
     try {
-      const res = await axios.delete(`http://localhost:3003/categories/${id}`, {
+      const res = await axios.delete(`http://localhost:3002/categories/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -166,7 +172,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   
     try {
       const response = await axios.post(
-        'http://localhost:3003/cart/add',
+        'http://localhost:3002/cart/add',
         {
           productId,
           quantity: 1,
@@ -195,7 +201,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   
   return (
     <div>
-      <Header />
+      <Header onSearch={() => {}} />
       <div className="categories-page">
         <div className="sidebar">
           <h3>Categorías</h3>

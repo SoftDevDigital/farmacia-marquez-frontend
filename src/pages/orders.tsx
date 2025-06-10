@@ -2,16 +2,33 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 const OrdersPage = () => {
-  const [orders, setOrders] = useState([]);
+  type Order = {
+  _id: string;
+  status: string;
+  total: number;
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }[];
+};
+
+type Product = {
+  _id: string;
+  name: string;
+  // podés agregar más campos si usás otros, como `price`, `imageUrl`, etc.
+};
+
+const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState('');
 
 
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const router = useRouter();
 useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:3003/products');
+      const res = await axios.get('http://localhost:3002/products');
       setProducts(res.data);
     } catch (err) {
       console.error('Error al cargar productos', err);
@@ -26,7 +43,7 @@ useEffect(() => {
       const token = localStorage.getItem('USER_TOKEN');  
 
       try {
-        const response = await axios.get('http://localhost:3003/orders', {
+        const response = await axios.get('http://localhost:3002/orders', {
           headers: {
             Authorization: `Bearer ${token}`  
           }

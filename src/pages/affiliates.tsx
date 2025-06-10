@@ -54,7 +54,7 @@ const AffiliatesPage = () => {
         setIsAdmin(true);
 
         // Realizamos la solicitud para obtener los afiliados
-        const response = await axios.get('http://localhost:3003/affiliates', {
+        const response = await axios.get('http://localhost:3002/affiliates', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -106,7 +106,7 @@ const AffiliatesPage = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:3003/affiliates/${editingAffiliateId}`,
+        `http://localhost:3002/affiliates/${editingAffiliateId}`,
         affiliateData,
         {
           headers: {
@@ -165,7 +165,7 @@ const AffiliatesPage = () => {
   
     try {
       const response = await axios.delete(
-        `http://localhost:3003/affiliates/${affiliateId}`,
+        `http://localhost:3002/affiliates/${affiliateId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -187,7 +187,7 @@ const AffiliatesPage = () => {
 
   return (
     <div>
-      <Header />
+      <Header onSearch={() => {}} />
       <div className="affiliates-page">
         <h1>Afiliados</h1>
         {error && <p>{error}</p>}
@@ -384,7 +384,7 @@ const AffiliatesPage = () => {
                   required
                 />
               </div>
-              <button class="btn btn-buy" type="submit">Actualizar Afiliado</button>
+              <button className="btn btn-buy" type="submit">Actualizar Afiliado</button>
             </form>
           </div>
         )}
@@ -397,8 +397,8 @@ const AffiliatesPage = () => {
                 <p>Email: {affiliate.email}</p>
                 <p>Teléfono: {affiliate.phoneNumber}</p>
                 <p>Dirección: {affiliate.address.street}, {affiliate.address.city}</p>
-                <button class="btn btn-buy" onClick={() => handleEditAffiliate(affiliate._id)}>Editar</button>
-                <button class="btn btn-buy" onClick={() => handleDeleteAffiliate(affiliate._id)}>Eliminar</button>
+                <button className="btn btn-buy" onClick={() => handleEditAffiliate(affiliate._id)}>Editar</button>
+                <button className="btn btn-buy" onClick={() => handleDeleteAffiliate(affiliate._id)}>Eliminar</button>
               </div>
             ))}
           </div>

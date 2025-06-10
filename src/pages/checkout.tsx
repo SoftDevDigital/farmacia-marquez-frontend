@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { AxiosError } from 'axios';
+
 
 const Checkout = () => {
   const [cart, setCart] = useState<any>({ items: [] });
@@ -28,7 +30,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       if (!token) return;
   
       try {
-        const cartResponse = await axios.get('http://localhost:3003/cart', {
+        const cartResponse = await axios.get('http://localhost:3002/cart', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCart(cartResponse.data);
@@ -100,7 +102,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       }
   
       const shippingResponse = await axios.post(
-        'http://localhost:3003/users/shipping-info',
+        'http://localhost:3002/users/shipping-info',
         shippingInfo,
         {
           headers: {
@@ -112,7 +114,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
   
       if (shippingResponse.status === 200 || shippingResponse.status === 201) {
         const paymentResponse = await axios.post(
-          'http://localhost:3003/payments/checkout',
+          'http://localhost:3002/payments/checkout',
           {
             selectedProductIds: selectedItems.map((item: any) => item.productId),
           },
@@ -131,9 +133,10 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
         }
       }
     } catch (error) {
-      console.error('Error al procesar el pago:', error.response?.data || error);
-      alert('Error al procesar el pago');
-    }
+  const err = error as AxiosError;
+  console.error('Error al procesar el pago:', err.response?.data || err.message);
+  alert('Error al procesar el pago');
+}
   };
   
 
@@ -142,7 +145,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   return (
     <>
-      <Header />
+      <Header onSearch={() => {}} />
       <div className="checkout-container">
         <h2>Información de Envío</h2>
        <form className="shipping-form">
