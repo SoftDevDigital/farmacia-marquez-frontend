@@ -34,7 +34,7 @@ const Products: FC = () => {
   });
   const [editingProduct, setEditingProduct] = useState<string | null>(null); // Estado para edición de productos
   const [isAdmin, setIsAdmin] = useState(false); // Verificar si el usuario tiene rol ADMIN
-
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -53,24 +53,49 @@ const Products: FC = () => {
 
   // Fetch categories, products, and brands from API
   useEffect(() => {
-    const fetchCategoriesAndProductsAndBrands = async () => {
-      try {
-        const categoryResponse = await axios.get('http://localhost:3002/categories');
-        const productResponse = await axios.get('http://localhost:3002/products');
-        console.log('prodcutos',productResponse);
-        const brandResponse = await axios.get('http://localhost:3002/brands');
+ const fetchCategoriesAndProductsAndBrands = async () => {
+  try {
+    const [categoryRes, productRes, brandRes, promotionRes] = await Promise.all([
+      axios.get('https://api.farmaciamarquezcity.com/categories'),
+      axios.get('https://api.farmaciamarquezcity.com/products'),
+      axios.get('https://api.farmaciamarquezcity.com/brands'),
+      axios.get('https://api.farmaciamarquezcity.com/promotions'),
+    ]);
 
-        setCategories(categoryResponse.data);
-        setProducts(productResponse.data);
-        setBrands(brandResponse.data);
-      } catch (error) {
-        setError('Error al cargar las categorías, productos o marcas');
-      }
-    };
+    const promotions = promotionRes.data;
 
-    fetchCategoriesAndProductsAndBrands();
-  }, []);
+    const normalizedPromotions = promotions.map((promo: any) => ({
+  ...promo,
+  productIds: Array.isArray(promo.productIds)
+    ? promo.productIds
+    : [promo.productIds],
+}));
 
+    const enrichedProducts = productRes.data.map((product: any) => {
+      const matchedPromotion = normalizedPromotions.find((promo: any) =>
+        promo.productIds.includes(String(product._id))
+      );
+
+      console.log("Producto:", product.name, "→ Promo encontrada:", matchedPromotion?.type);
+
+      return {
+        ...product,
+        appliedPromotion: matchedPromotion || null,
+        promotionType: matchedPromotion?.type || null,
+      };
+    });
+
+    setCategories(categoryRes.data);
+    setBrands(brandRes.data);
+    setProducts(enrichedProducts);
+  } catch (error) {
+    setError('Error al cargar categorías, productos o promociones');
+    console.error(error);
+  }
+};
+
+  fetchCategoriesAndProductsAndBrands();
+}, []);
   // Filtrar productos por categoría, marca y precio
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
@@ -104,10 +129,10 @@ const Products: FC = () => {
     };
   
     try {
-      const res = await axios.post('http://localhost:3002/products', preparedProduct, {
+      const res = await axios.post('https://api.farmaciamarquezcity.com/products', preparedProduct, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json',  
         },
       });
   
@@ -172,7 +197,7 @@ const Products: FC = () => {
     };
     try {
       const res = await axios.patch(
-        `http://localhost:3002/products/${editingProduct}`,
+        `https://api.farmaciamarquezcity.com/products/${editingProduct}`,
         preparedProduct,
         {
           headers: {
@@ -252,7 +277,7 @@ const Products: FC = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:3002/cart/add',
+        'https://api.farmaciamarquezcity.com/cart/add',
         {
           productId,
           quantity: finalQuantity,
@@ -315,7 +340,7 @@ if (productImage && cartIcon) {
   const handleDeleteProduct = async (productId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
-      const res = await axios.delete(`http://localhost:3002/products/${productId}`, {
+      const res = await axios.delete(`https://api.farmaciamarquezcity.com/products/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -332,6 +357,10 @@ if (productImage && cartIcon) {
       alert('Error al eliminar el producto');
     }
   };
+
+
+
+
 
   return (
     <div>
@@ -386,45 +415,80 @@ if (productImage && cartIcon) {
           <div className="grid-header">
             <h1>Productos</h1>
             <div className="sort-options">
-              <span>A-Z</span>
-              <span>↑↓</span>
+              
+            
             </div>
           </div>
 
          <div className="products">
+          
   {filteredProducts.map((product) => (
     <div key={product._id} className="product-card">
       <Link href={`/products/${product._id}`} passHref legacyBehavior>
-        <a style={{ textDecoration: 'none', color: 'inherit' }}>
-          <img src={product.imageUrl} alt={product.name} data-product-id={product._id} className="product-image" />
-          <h3 className="product-name">{product.name}</h3>
-          <p className="product-description">
-            {product.description.length > 40
-              ? product.description.slice(0, 40) + '...'
-              : product.description}
-          </p>
-          {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
-            <p className="product-price">
-              <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
-                ${product.price.toLocaleString('es-AR')}
-              </span>
-              <span style={{ fontWeight: 'bold', color: 'green' }}>
-                ${product.discountedPrice.toLocaleString('es-AR')}
-              </span>
-            </p>
-          ) : (
-            <p className="product-price">
-              ${product.price.toLocaleString('es-AR')}
-            </p>
-          )}
-          <p className="product-stock">Stock: {product.stock}</p>
-          {product.installment && (
-            <p className="installment">
-              3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}
-            </p>
-          )}
-        </a>
-      </Link>
+  <a style={{ textDecoration: 'none', color: 'inherit', position: 'relative', display: 'block' }}>
+   {product.promotionType === 'NXN' && (
+  <div style={{
+    backgroundColor: '#ff4081',
+    color: 'white',
+    padding: '4px 8px',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    zIndex: 1,
+    fontSize: '0.75rem'
+  }}>
+    ¡2x1!
+  </div>
+)}
+
+{product.promotionType === 'PERCENT_SECOND' && (
+  <div style={{
+    backgroundColor: '#ff9800',
+    color: 'white',
+    padding: '4px 8px',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    zIndex: 1,
+    fontSize: '0.75rem'
+  }}>
+    2da unidad -{product.appliedPromotion?.discountPercentage || 50}%
+  </div>
+)}
+    <img src={product.imageUrl} alt={product.name} data-product-id={product._id} className="product-image" />
+    <h3 className="product-name">{product.name}</h3>
+    <p className="product-description">
+      {product.description.length > 40
+        ? product.description.slice(0, 40) + '...'
+        : product.description}
+    </p>
+    {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+      <p className="product-price">
+        <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+          ${product.price.toLocaleString('es-AR')}
+        </span>
+        <span style={{ fontWeight: 'bold', color: 'green' }}>
+          ${product.discountedPrice.toLocaleString('es-AR')}
+        </span>
+      </p>
+    ) : (
+      <p className="product-price">
+        ${product.price.toLocaleString('es-AR')}
+      </p>
+    )}
+    <p className="product-stock">Stock: {product.stock}</p>
+    {product.installment && (
+      <p className="installment">
+        3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}
+      </p>
+    )}
+  </a>
+</Link>
+
 
       <div className="product-buttons">
         {isAdmin && (
@@ -491,6 +555,9 @@ if (productImage && cartIcon) {
   required
 />
 </div>
+
+
+
 
 <div className="form-group">
   <label htmlFor="stock">Stock</label>

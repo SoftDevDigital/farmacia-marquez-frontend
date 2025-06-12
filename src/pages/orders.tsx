@@ -28,7 +28,7 @@ const [orders, setOrders] = useState<Order[]>([]);
 useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:3002/products');
+      const res = await axios.get('https://api.farmaciamarquezcity.com/products');
       setProducts(res.data);
     } catch (err) {
       console.error('Error al cargar productos', err);
@@ -43,7 +43,7 @@ useEffect(() => {
       const token = localStorage.getItem('USER_TOKEN');  
 
       try {
-        const response = await axios.get('http://localhost:3002/orders', {
+        const response = await axios.get('https://api.farmaciamarquezcity.com/orders', {
           headers: {
             Authorization: `Bearer ${token}`  
           }

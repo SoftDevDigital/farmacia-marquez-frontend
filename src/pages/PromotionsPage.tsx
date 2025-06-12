@@ -21,7 +21,7 @@ const PromotionsPage = () => {
   getQuantity?: number;
 };
 
-const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [error, setError] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false); 
@@ -75,7 +75,7 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/promotions');
+        const response = await axios.get('https://api.farmaciamarquezcity.com/promotions');
         setPromotions(response.data);
       } catch (error) {
         setError('Error al cargar las promociones');
@@ -109,7 +109,7 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/products');
+        const response = await axios.get('https://api.farmaciamarquezcity.com/products');
         setProducts(response.data);
       } catch (error) {
         setError('Error al cargar los productos');
@@ -159,7 +159,7 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
   
     try {
       const response = await axios.post(
-        'http://localhost:3002/promotions',
+        'https://api.farmaciamarquezcity.com/promotions',
         preparedPromotion,
         {
           headers: {
@@ -207,7 +207,7 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
   
     try {
       const response = await axios.patch(
-        `http://localhost:3002/promotions/${promotionData._id}`,
+        `https://api.farmaciamarquezcity.com/promotions/${promotionData._id}`,
         updatedPromotionData,
         {
           headers: {
@@ -266,7 +266,7 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
     }
 
     try {
-      const response = await axios.delete(`http://localhost:3002/promotions/${promotionId}`, {
+      const response = await axios.delete(`https://api.farmaciamarquezcity.com/promotions/${promotionId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

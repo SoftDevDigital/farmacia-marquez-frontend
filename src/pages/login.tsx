@@ -19,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     if (email && password) {
       try {
-        const response = await axios.post('http://localhost:3002/auth/login', {
+        const response = await axios.post('https://api.farmaciamarquezcity.com/auth/login', {
           email: email,
           password: password,
         });
@@ -53,16 +53,16 @@ const Login = () => {
 
     // Abre el popup para el login con Google
     window.open(
-      'http://localhost:3002/auth/google',
+      'https://api.farmaciamarquezcity.com/auth/google',
       'google_login',
-      `width=${width},height=${height},top=${top},left=${left}`
+        `width=${width},height=${height},top=${top},left=${left}`
     );
   };
 
   // Escuchar mensajes del popup de Google
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'http://localhost:3002') return; // Verificar la fuente
+      if (event.origin !== 'https://api.farmaciamarquezcity.com') return; // Verificar la fuente
 
       const { accessToken, redirectUrl, error } = event.data;
 

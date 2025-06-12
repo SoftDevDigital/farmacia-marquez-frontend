@@ -30,7 +30,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       if (!token) return;
   
       try {
-        const cartResponse = await axios.get('http://localhost:3002/cart', {
+        const cartResponse = await axios.get('https://api.farmaciamarquezcity.com/cart', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCart(cartResponse.data);
@@ -102,7 +102,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
       }
   
       const shippingResponse = await axios.post(
-        'http://localhost:3002/users/shipping-info',
+        'https://api.farmaciamarquezcity.com/users/shipping-info',
         shippingInfo,
         {
           headers: {
@@ -114,7 +114,7 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
   
       if (shippingResponse.status === 200 || shippingResponse.status === 201) {
         const paymentResponse = await axios.post(
-          'http://localhost:3002/payments/checkout',
+          'https://api.farmaciamarquezcity.com/payments/checkout',
           {
             selectedProductIds: selectedItems.map((item: any) => item.productId),
           },

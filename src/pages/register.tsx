@@ -35,7 +35,7 @@ const Register = () => {
 
     try {
      
-      const response = await axios.post('http://localhost:3002/auth/register', {
+      const response = await axios.post('https://api.farmaciamarquezcity.com/auth/register', {
         email: email,
         password: password,
         firstName: name.split(' ')[0], 

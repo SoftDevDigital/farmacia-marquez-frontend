@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     
     try {
       // Hacer la solicitud POST al backend
-      const response = await fetch('http://localhost:3002/auth/forgot-password', {
+      const response = await fetch('https://api.farmaciamarquezcity.com/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -41,9 +41,9 @@ const Marcas: FC = () => {
   useEffect(() => {
     const fetchCategoriesAndProductsAndBrands = async () => {
       try {
-        const categoryResponse = await axios.get('http://localhost:3002/categories');
-        const productResponse = await axios.get('http://localhost:3002/products');
-        const brandResponse = await axios.get('http://localhost:3002/brands');
+        const categoryResponse = await axios.get('https://api.farmaciamarquezcity.com/categories');
+        const productResponse = await axios.get('https://api.farmaciamarquezcity.com/products');
+        const brandResponse = await axios.get('https://api.farmaciamarquezcity.com/brands');
         
         setCategories(categoryResponse.data);
         setProducts(productResponse.data);
@@ -60,7 +60,7 @@ const Marcas: FC = () => {
   const handleDelete = async (brandId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
-      const res = await axios.delete(`http://localhost:3002/brands/${brandId}`, {
+      const res = await axios.delete(`https://api.farmaciamarquezcity.com/brands/${brandId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const Marcas: FC = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:3002/brands',
+        'https://api.farmaciamarquezcity.com/brands',
         { name: brandName },
         {
           headers: {
@@ -130,7 +130,7 @@ const Marcas: FC = () => {
     const token = localStorage.getItem('USER_TOKEN');
     try {
       const res = await axios.patch(
-        `http://localhost:3002/brands/${editingBrand}`,
+        `https://api.farmaciamarquezcity.com/brands/${editingBrand}`,
         { name: brandName },
         {
           headers: {
@@ -173,39 +173,75 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
   });
 
   const handleAddToCart = async (productId: string) => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      alert('No estás autenticado');
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        'http://localhost:3002/cart/add',
-        {
-          productId,
-          quantity: 1,
-          applyDiscount: false,
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('No estás autenticado');
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.farmaciamarquezcity.com/cart/add',
+      {
+        productId,
+        quantity: 1,
+        applyDiscount: false,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      if (response.status === 201) {
-        await fetchCartCount();  // ✅ ACTUALIZA el contador
-        alert('Producto agregado al carrito');
-      } else {
-        alert('Hubo un problema al agregar el producto');
       }
-    } catch (error) {
-      console.error(error);
-      alert('Error al agregar el producto al carrito');
+    );
+
+    if (response.status === 201) {
+      await fetchCartCount();
+
+// ✅ Esperar al siguiente ciclo de render para asegurar que los elementos están posicionados correctamente
+setTimeout(() => {
+  const productImage = document.querySelector(`img[data-product-id="${productId}"]`);
+  const cartIcon = document.querySelector('.cart-icon');
+
+  if (productImage && cartIcon) {
+    const imgRect = productImage.getBoundingClientRect();
+    const cartRect = cartIcon.getBoundingClientRect();
+
+    const flyingImg = productImage.cloneNode(true) as HTMLElement;
+    flyingImg.style.position = 'fixed';
+    flyingImg.style.top = `${imgRect.top}px`;
+    flyingImg.style.left = `${imgRect.left}px`;
+    flyingImg.style.width = `${imgRect.width}px`;
+    flyingImg.style.height = `${imgRect.height}px`;
+    flyingImg.style.transition = 'all 0.8s ease-in-out';
+    flyingImg.style.zIndex = '9999';
+
+    document.body.appendChild(flyingImg);
+
+    requestAnimationFrame(() => {
+      flyingImg.style.top = `${cartRect.top}px`;
+      flyingImg.style.left = `${cartRect.left}px`;
+      flyingImg.style.width = '20px';
+      flyingImg.style.height = '20px';
+      flyingImg.style.opacity = '0.5';
+    });
+
+    flyingImg.addEventListener('transitionend', () => {
+      flyingImg.remove();
+      cartIcon.classList.add('bounce');
+      setTimeout(() => cartIcon.classList.remove('bounce'), 500);
+    });
+  }
+}, 0); 
+
+    } else {
+      alert('Hubo un problema al agregar el producto');
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert('Error al agregar el producto al carrito');
+  }
+};
 
   return (
     <div>

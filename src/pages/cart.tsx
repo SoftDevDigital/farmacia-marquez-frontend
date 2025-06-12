@@ -41,7 +41,7 @@ const CartPage: FC = () => {
         return;
       }
   
-      const response = await axios.get('http://localhost:3002/cart', {
+      const response = await axios.get('https://api.farmaciamarquezcity.com/cart', {
         headers: { Authorization: `Bearer ${token}` },
       });
   
@@ -50,7 +50,7 @@ const CartPage: FC = () => {
           response.data.items.map(async (item: any) => {
             try {
               const productResponse = await axios.get(
-                `http://localhost:3002/products/${item.productId}`
+                `https://api.farmaciamarquezcity.com/products/${item.productId}`
               );
               const product = productResponse.data;
   
@@ -109,7 +109,7 @@ const CartPage: FC = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:3002/cart/update/${productId}`,
+        `https://api.farmaciamarquezcity.com/cart/update/${productId}`,
         { quantity: newQuantity },
         {
           headers: {
@@ -144,7 +144,7 @@ const CartPage: FC = () => {
     setCart(updatedCart);
   
     try {
-      const response = await axios.delete(`http://localhost:3002/cart/remove/${productId}`, {
+      const response = await axios.delete(`https://api.farmaciamarquezcity.com/cart/remove/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -175,7 +175,7 @@ const CartPage: FC = () => {
     setCart({ items: [], total: 0 });
   
     try {
-      const response = await axios.delete('http://localhost:3002/cart/clear', {
+      const response = await axios.delete('https://api.farmaciamarquezcity.com/cart/clear', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -240,7 +240,7 @@ const CartPage: FC = () => {
       if (!token) return;
   
       try {
-        const res = await axios.get('http://localhost:3002/users/shipping-info', {
+        const res = await axios.get('https://api.farmaciamarquezcity.com/users/shipping-info', {
           headers: { Authorization: `Bearer ${token}` },
         });
   
@@ -261,8 +261,9 @@ const CartPage: FC = () => {
 
   
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onSearch={() => {}} />
+        <main style={{ flex: 1 }}>
       <div className="cart-page">
         <h1>Mi Carrito</h1>
         {loading ? (
@@ -396,6 +397,7 @@ const CartPage: FC = () => {
 </button>
        
       </div>
+      </main>
       <Footer />
     </div>
   );

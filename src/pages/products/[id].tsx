@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useCart } from '@/context/CartContext';
 
 const ProductDetail = () => {
   const router = useRouter();
@@ -11,13 +12,14 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const { fetchCartCount } = useCart();
 
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:3002/products/${id}`);
+        const res = await axios.get(`https://api.farmaciamarquezcity.com/products/${id}`);
         setProduct(res.data);
       } catch (err) {
         setError('Producto no encontrado');
@@ -33,34 +35,77 @@ const ProductDetail = () => {
   if (error) return <p>{error}</p>;
 
   const handleAddToCart = async () => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      alert('Debes iniciar sesión para agregar productos al carrito.');
-      router.push('/login');
-      return;
-    }
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('Debes iniciar sesión para agregar productos al carrito.');
+    router.push('/login');
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        'http://localhost:3002/cart/add',
-        { productId: product._id, quantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.status === 200) {
-        alert('Producto agregado al carrito ✅');
-      } else {
-        alert('No se pudo agregar al carrito.');
+  try {
+    const response = await axios.post(
+      'https://api.farmaciamarquezcity.com/cart/add',
+      {
+        productId: product._id,
+        quantity,
+        applyDiscount: false,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       }
-    } catch (err) {
-      console.error(err);
-      alert('Ocurrió un error al agregar al carrito.');
+    );
+
+    if (response.status === 201) {
+      await fetchCartCount(); // ✅ actualiza el contador
+
+      const productImage = document.querySelector(`img[data-product-id="${product._id}"]`);
+      const cartIcon = document.querySelector('.cart-icon');
+
+      if (productImage && cartIcon) {
+        const imgRect = productImage.getBoundingClientRect();
+        const cartRect = cartIcon.getBoundingClientRect();
+
+        const flyingImg = productImage.cloneNode(true) as HTMLElement;
+        flyingImg.style.position = 'fixed';
+        flyingImg.style.top = `${imgRect.top}px`;
+        flyingImg.style.left = `${imgRect.left}px`;
+        flyingImg.style.width = `${imgRect.width}px`;
+        flyingImg.style.height = `${imgRect.height}px`;
+        flyingImg.style.transition = 'all 0.8s ease-in-out';
+        flyingImg.style.zIndex = '9999';
+
+        document.body.appendChild(flyingImg);
+
+        requestAnimationFrame(() => {
+          flyingImg.style.top = `${cartRect.top}px`;
+          flyingImg.style.left = `${cartRect.left}px`;
+          flyingImg.style.width = '20px';
+          flyingImg.style.height = '20px';
+          flyingImg.style.opacity = '0.5';
+        });
+
+        flyingImg.addEventListener('transitionend', () => {
+          flyingImg.remove();
+          cartIcon.classList.add('bounce');
+          setTimeout(() => cartIcon.classList.remove('bounce'), 500);
+        });
+      }
+    } else {
+      alert('No se pudo agregar al carrito.');
     }
-  };
+  } catch (err: any) {
+    console.error(err.response?.data || err);
+    alert('Ocurrió un error al agregar al carrito.');
+  }
+};
 
   return (
     <>
       <Header onSearch={() => {}} />
+         <main style={{ flex: 1 }}>
       <div style={{ padding: '40px 20px', backgroundColor: '#f9f9f9' }}>
         <div style={{
           display: 'flex',
@@ -76,6 +121,7 @@ const ProductDetail = () => {
               src={product.imageUrl || '/default-image.jpg'}
               alt={product.name}
               style={{ maxWidth: '100%', height: 'auto', borderRadius: '10px', objectFit: 'contain' }}
+               data-product-id={product._id} 
             />
           </div>
 
@@ -107,6 +153,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      </main>
       <Footer />
     </>
   );

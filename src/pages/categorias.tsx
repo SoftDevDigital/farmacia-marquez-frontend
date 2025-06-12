@@ -40,7 +40,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:3002/categories')
+    axios.get('https://api.farmaciamarquezcity.com/categories')
       .then(res => setCategories(res.data))
       .catch(() => setError('Error al cargar las categorías'));
   }, []);
@@ -49,7 +49,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      let url = 'http://localhost:3002/products';
+      let url = 'https://api.farmaciamarquezcity.com/products';
 
       // Si hay categoría seleccionada, agregamos el filtro
       if (selectedCategory) {
@@ -90,7 +90,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
       return alert('Completá todos los campos');
     }
     try {
-      const res = await axios.post('http://localhost:3002/categories', categoryData, {
+      const res = await axios.post('https://api.farmaciamarquezcity.com/categories', categoryData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 201) {
@@ -113,7 +113,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
         name: categoryData.name,
         subcategories: categoryData.subcategories.map(sub => sub._id ? { _id: sub._id, name: sub.name } : { name: sub.name })
       };
-      const res = await axios.patch(`http://localhost:3002/categories/${editingCategory}`, payload, {
+      const res = await axios.patch(`https://api.farmaciamarquezcity.com/categories/${editingCategory}`, payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (res.status === 200) {
@@ -134,7 +134,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
     if (!token) return alert('No estás autenticado');
   
     try {
-      const res = await axios.delete(`http://localhost:3002/categories/${id}`, {
+      const res = await axios.delete(`https://api.farmaciamarquezcity.com/categories/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -164,39 +164,73 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   };
 
   const handleAddToCart = async (productId: string) => {
-    const token = localStorage.getItem('USER_TOKEN');
-    if (!token) {
-      alert('No estás autenticado');
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        'http://localhost:3002/cart/add',
-        {
-          productId,
-          quantity: 1,
-          applyDiscount: false,
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('No estás autenticado');
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.farmaciamarquezcity.com/cart/add',
+      {
+        productId,
+        quantity: 1,
+        applyDiscount: false,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      if (response.status === 201) {
-        await fetchCartCount(); // ✅ ACTUALIZA el contador del carrito
-        alert('Producto agregado al carrito');
-      } else {
-        alert('Hubo un problema al agregar el producto');
       }
-    } catch (error) {
-      console.error(error);
-      alert('Error al agregar el producto al carrito');
+    );
+
+    if (response.status === 201) {
+      await fetchCartCount(); // ✅ ACTUALIZA el contador del carrito
+      
+      // 🔄 Animación de producto al carrito
+      const productImage = document.querySelector(`img[data-product-id="${productId}"]`);
+      const cartIcon = document.querySelector('.cart-icon');
+
+      if (productImage && cartIcon) {
+        const imgRect = productImage.getBoundingClientRect();
+        const cartRect = cartIcon.getBoundingClientRect();
+
+        const flyingImg = productImage.cloneNode(true) as HTMLElement;
+        flyingImg.style.position = 'fixed';
+        flyingImg.style.top = `${imgRect.top}px`;
+        flyingImg.style.left = `${imgRect.left}px`;
+        flyingImg.style.width = `${imgRect.width}px`;
+        flyingImg.style.height = `${imgRect.height}px`;
+        flyingImg.style.transition = 'all 0.8s ease-in-out';
+        flyingImg.style.zIndex = '9999';
+
+        document.body.appendChild(flyingImg);
+
+        requestAnimationFrame(() => {
+          flyingImg.style.top = `${cartRect.top}px`;
+          flyingImg.style.left = `${cartRect.left}px`;
+          flyingImg.style.width = '20px';
+          flyingImg.style.height = '20px';
+          flyingImg.style.opacity = '0.5';
+        });
+
+        flyingImg.addEventListener('transitionend', () => {
+          flyingImg.remove();
+          cartIcon.classList.add('bounce');
+          setTimeout(() => cartIcon.classList.remove('bounce'), 500);
+        });
+      }
+
+    } else {
+      alert('Hubo un problema al agregar el producto');
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert('Error al agregar el producto al carrito');
+  }
+};
 
   
   return (
@@ -248,7 +282,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
       <div key={prod._id} className="product-card">
         <Link href={`/products/${prod._id}`} passHref legacyBehavior>
           <a style={{ textDecoration: 'none', color: 'inherit' }}>
-            <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" />
+            <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" data-product-id={prod._id} />
             <h3>{prod.name}</h3>
             <p>
               {prod.description.length > 40
