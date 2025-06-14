@@ -3,11 +3,24 @@ import jwt_decode from 'jwt-decode';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
+import axios from 'axios';
+type Order = {
+  _id: string;
+  status: string;
+  total: number;
+  items: {
+    productId: string;
+    quantity: number;
+    price: number;
+  }[];
+};
+
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
-
+  const [orders, setOrders] = useState<Order[]>([]);
+const [error, setError] = useState('');
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
 
@@ -23,6 +36,27 @@ const ProfilePage = () => {
       console.error('Error al decodificar el token', err);
     }
   }, []);
+
+  useEffect(() => {
+  const fetchOrders = async () => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) return;
+
+    try {
+      const res = await axios.get('https://api.farmaciamarquezcity.com/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setOrders(res.data);
+    } catch (err) {
+      console.error(err);
+      setError('No se pudieron cargar los pedidos');
+    }
+  };
+
+  fetchOrders();
+}, []);
 
   return (
     <div className="profile-page">
@@ -50,6 +84,33 @@ const ProfilePage = () => {
         ) : (
           <p className="loading-text">Cargando tus datos...</p>
         )}
+        <h2 style={{ marginTop: '2rem' }}>Mis pedidos</h2>
+{error && <p style={{ color: 'red' }}>{error}</p>}
+{orders.length === 0 ? (
+  <p>No tenés pedidos realizados.</p>
+) : (
+  orders.map((order) => (
+    <div key={order._id} style={{
+      background: '#fff',
+      border: '1px solid #e5e7eb',
+      padding: '1rem',
+      borderRadius: '8px',
+      marginBottom: '1rem'
+    }}>
+      <p><strong>ID:</strong> {order._id.slice(0, 8)}...</p>
+      <p><strong>Estado:</strong> {order.status}</p>
+      <p><strong>Total:</strong> ${order.total}</p>
+      <ul>
+        {order.items.map((item, idx) => (
+          <li key={idx}>
+            Producto: {item.productId} — Cantidad: {item.quantity} — Precio: ${item.price}
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))
+)}
+
       </main>
 
       <Footer />
