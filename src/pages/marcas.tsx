@@ -20,6 +20,7 @@ const Marcas: FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingBrand, setEditingBrand] = useState<string | null>(null); // Estado para la marca en edición
   const { fetchCartCount } = useCart();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
@@ -175,9 +176,9 @@ const matchesPrice = product.price >= from && product.price <= priceTo;
   const handleAddToCart = async (productId: string) => {
   const token = localStorage.getItem('USER_TOKEN');
   if (!token) {
-    alert('No estás autenticado');
-    return;
-  }
+  setShowLoginModal(true);
+  return;
+}
 
   try {
     const response = await axios.post(
@@ -301,11 +302,8 @@ setTimeout(() => {
 
         <main className="product-grid">
           <div className="grid-header">
-            <h1>Productos</h1>
-            <div className="sort-options">
-              <span>↑↓ Ordenar</span>
-            </div>
-          </div>
+            
+                   </div>
 
           <div className="products">
           {filteredProducts.map((product) => (
@@ -332,7 +330,7 @@ setTimeout(() => {
         <p className="product-stock">Stock: {product.stock}</p>
       </a>
     </Link>
-    <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Comprar</button>
+    <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Agregar producto al carrito</button>
   </div>
 ))}
           </div>
@@ -372,6 +370,20 @@ setTimeout(() => {
     ) : (
       <p>No hay marcas disponibles.</p>
     )}
+  </div>
+)}
+
+{showLoginModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>Iniciar sesión requerido</h2>
+      <p>Debes iniciar sesión o registrarte para agregar productos al carrito.</p>
+      <div className="modal-buttons">
+        <button className="btn btn-buy" onClick={() => window.location.href = '/login'}>Iniciar sesión</button>
+        <button className="btn btn-buy" onClick={() => window.location.href = '/register'}>Registrarme</button>
+        <button className="btn btn-buy" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+      </div>
+    </div>
   </div>
 )}
      

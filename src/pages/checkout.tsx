@@ -23,36 +23,73 @@ const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     country: '',
     additionalNotes: ''
   });
+const [storedShippingInfo, setStoredShippingInfo] = useState<any>(null);
+
+useEffect(() => {
+  const fetchProfileShippingInfo = async () => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) return;
+
+    try {
+      const res = await axios.get('https://api.farmaciamarquezcity.com/users/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.data?.shippingInfo) {
+        setStoredShippingInfo(res.data.shippingInfo);
+      }
+    } catch (error) {
+      console.error('Error al cargar la información de perfil', error);
+    }
+  };
+
+  fetchProfileShippingInfo();
+}, []);
+
+
+  useEffect(() => {
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('Debés iniciar sesión para continuar con la compra.');
+    router.push('/login');
+  }
+}, []);
 const [errors, setErrors] = useState<{ [key: string]: string }>({});
   useEffect(() => {
-    const fetchCartAndSelection = async () => {
-      const token = localStorage.getItem('USER_TOKEN');
-      if (!token) return;
-  
-      try {
-        const cartResponse = await axios.get('https://api.farmaciamarquezcity.com/cart', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCart(cartResponse.data);
-  
-        const storedSelectedIds = localStorage.getItem('selectedProductIds');
-        if (storedSelectedIds) {
-          setSelectedProductIds(JSON.parse(storedSelectedIds));
-        }
-  
-        const savedShippingInfo = localStorage.getItem('shippingInfo');
-        if (savedShippingInfo) {
-          setShippingInfo(JSON.parse(savedShippingInfo));
-        }
-  
-      } catch (err) {
-        console.error('Error al traer el carrito o la selección', err);
+  const fetchCartAndSelection = async () => {
+    const token = localStorage.getItem('USER_TOKEN');
+    if (!token) return;
+
+    try {
+      const cartResponse = await axios.get('https://api.farmaciamarquezcity.com/cart', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (cartResponse.data.items.length === 0) {
+        alert('Tu carrito está vacío. Agregá productos antes de continuar al pago.');
+        router.push('/cart');
+        return;
       }
-    };
-  
-    fetchCartAndSelection();
-  }, []);
-  
+
+      setCart(cartResponse.data);
+
+      const storedSelectedIds = localStorage.getItem('selectedProductIds');
+      if (storedSelectedIds) {
+        setSelectedProductIds(JSON.parse(storedSelectedIds));
+      }
+
+      const savedShippingInfo = localStorage.getItem('shippingInfo');
+      if (savedShippingInfo) {
+        setShippingInfo(JSON.parse(savedShippingInfo));
+      }
+
+    } catch (err) {
+      console.error('Error al traer el carrito o la selección', err);
+    }
+  };
+
+  fetchCartAndSelection();
+}, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
@@ -146,8 +183,19 @@ const [errors, setErrors] = useState<{ [key: string]: string }>({});
   return (
     <>
       <Header onSearch={() => {}} />
-      <div className="checkout-container">
+      <div className="checkout-container" style={{ paddingTop: '160px' }}>
         <h2>Información de Envío</h2>
+        {storedShippingInfo && (
+  <div style={{ marginBottom: '1rem' }}>
+    <button
+      type="button"
+      className="btn btn-buy"
+      onClick={() => setShippingInfo(storedShippingInfo)}
+    >
+      Rellenar con mis datos guardados
+    </button>
+  </div>
+)}
        <form className="shipping-form">
   <div className="form-group">
     <label htmlFor="recipientName">Nombre:</label>

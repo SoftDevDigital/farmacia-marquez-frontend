@@ -13,6 +13,8 @@ const ProductDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { fetchCartCount } = useCart();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
 
   useEffect(() => {
     if (!id) return;
@@ -37,10 +39,9 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
   const token = localStorage.getItem('USER_TOKEN');
   if (!token) {
-    alert('Debes iniciar sesión para agregar productos al carrito.');
-    router.push('/login');
-    return;
-  }
+  setShowLoginModal(true);
+  return;
+}
 
   try {
     const response = await axios.post(
@@ -105,7 +106,7 @@ const ProductDetail = () => {
   return (
     <>
       <Header onSearch={() => {}} />
-         <main style={{ flex: 1 }}>
+         <main style={{ flex: 1, paddingTop: '120px' }}>
       <div style={{ padding: '40px 20px', backgroundColor: '#f9f9f9' }}>
         <div style={{
           display: 'flex',
@@ -132,28 +133,49 @@ const ProductDetail = () => {
             <p style={{ fontSize: '16px', color: '#4B5563', marginBottom: '20px', lineHeight: '1.6' }}>
               {product.description}
             </p>
-            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#14b8a6', marginBottom: '24px' }}>
-              ${product.price.toLocaleString('es-AR')}
-            </p>
+           <p style={{
+  fontSize: '36px',
+  fontWeight: '900',
+  color: '#14b8a6',
+  marginBottom: '24px',
+  textShadow: '0 1px 2px rgba(0,0,0,0.15)'
+}}>
+  ${product.price.toLocaleString('es-AR')}
+</p>
             <button
-              onClick={handleAddToCart}
-              style={{
-                backgroundColor: '#14b8a6',
-                color: 'white',
-                fontSize: '16px',
-                padding: '14px 0',
-                border: 'none',
-                borderRadius: '9999px',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              COMPRAR
-            </button>
+  onClick={handleAddToCart}
+  style={{
+    backgroundColor: '#14b8a6',
+    color: 'white',
+    fontSize: '16px',
+    padding: '12px 24px',
+    border: 'none',
+    borderRadius: '9999px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    alignSelf: 'start' // para que no estire en flex-column
+  }}
+>
+  Agregar producto al carrito
+</button>
           </div>
         </div>
       </div>
       </main>
+      {showLoginModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>Iniciar sesión requerido</h2>
+      <p>Debes iniciar sesión o registrarte para agregar productos al carrito.</p>
+      <div className="modal-buttons">
+        <button className="btn btn-buy" onClick={() => router.push('/login')}>Iniciar sesión</button>
+        <button className="btn btn-buy" onClick={() => router.push('/register')}>Registrarme</button>
+        <button className="btn btn-buy" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+      </div>
+    </div>
+  </div>
+)}
+
       <Footer />
     </>
   );

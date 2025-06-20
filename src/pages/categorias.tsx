@@ -14,6 +14,7 @@ const Categories: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]); 
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [categoryData, setCategoryData] = useState<{
   name: string;
   subcategories: { _id?: string; name: string }[];
@@ -166,9 +167,9 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   const handleAddToCart = async (productId: string) => {
   const token = localStorage.getItem('USER_TOKEN');
   if (!token) {
-    alert('No estás autenticado');
-    return;
-  }
+  setShowLoginModal(true); 
+  return;
+}
 
   try {
     const response = await axios.post(
@@ -236,77 +237,89 @@ const [priceFrom, setPriceFrom] = useState<string>('');
   return (
     <div>
       <Header onSearch={() => {}} />
-      <div className="categories-page">
-        <div className="sidebar">
-          <h3>Categorías</h3>
-          <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select select-categoria">
-            <option value="">Selecciona una categoría</option>
-            {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
-          </select>
-         {selectedCategory && (
-  <>
-    <h3>Subcategorías</h3>
-    <select
-      value={selectedSubcategory}
-      onChange={handleFilterSubcategoryChange}
-      className="filter-select"
-    >
-      <option value="">Selecciona una subcategoría</option>
-      {categories.find(c => c._id === selectedCategory)?.subcategories.map((sub: any) => (
-        <option key={sub._id} value={sub._id}>{sub.name}</option>
-      ))}
+       
+           <div className="categories-page">
+
+  <aside className="sidebar">
+    <h3>Categorías</h3>
+    <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select select-categoria">
+      <option value="">Selecciona una categoría</option>
+      {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
     </select>
-  </>
-)}
-          <h3>Filtrar por</h3>
-<h4>Precio</h4>
-<div className="price-filter">
-  <label>Desde</label>
-  <input
-    type="number"
-    placeholder="Precio desde"
-    value={priceFrom}
-    onChange={(e) => {
-      const value = e.target.value;
-      if (/^\d*$/.test(value)) setPriceFrom(value);
-    }}
-  />
-</div>
-        </div>
 
-        <div className="product-grid">
-  <h2>Productos</h2>
-  {error && <p className="error-message">{error}</p>}
-  <div className="category-list">
-    {products.map((prod) => (
-      <div key={prod._id} className="product-card">
-        <Link href={`/products/${prod._id}`} passHref legacyBehavior>
-          <a style={{ textDecoration: 'none', color: 'inherit' }}>
-            <img src={prod.imageUrl || '/default-image.jpg'} alt={prod.name} className="product-image" data-product-id={prod._id} />
-            <h3>{prod.name}</h3>
-            <p>
-              {prod.description.length > 40
-                ? prod.description.slice(0, 40) + '...'
-                : prod.description}
-            </p>
-            <p className="product-price">
-              {prod.discountedPrice !== undefined && prod.discountedPrice < prod.price ? (
-                <>
-                  <span style={{ textDecoration: 'line-through', color: 'gray' }}>${prod.price.toLocaleString('es-AR')}</span>
-                  <span style={{ fontWeight: 'bold', color: 'green' }}> ${prod.discountedPrice.toLocaleString('es-AR')}</span>
-                </>
-              ) : `$${prod.price.toLocaleString('es-AR')}`}
-            </p>
-            <p>Stock: {prod.stock}</p>
-          </a>
-        </Link>
-        <button className="btn btn-buy" onClick={() => handleAddToCart(prod._id)}>Comprar</button>
-      </div>
-    ))}
+    {selectedCategory && (
+      <>
+        <h3>Subcategorías</h3>
+        <select
+          value={selectedSubcategory}
+          onChange={handleFilterSubcategoryChange}
+          className="filter-select"
+        >
+          <option value="">Selecciona una subcategoría</option>
+          {categories.find(c => c._id === selectedCategory)?.subcategories.map((sub: any) => (
+            <option key={sub._id} value={sub._id}>{sub.name}</option>
+          ))}
+        </select>
+      </>
+    )}
+
+    <h3>Filtrar por</h3>
+    <h4>Precio</h4>
+    <div className="price-filter">
+      <label>Desde</label>
+      <input
+        type="number"
+        placeholder="Precio desde"
+        value={priceFrom}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (/^\d*$/.test(value)) setPriceFrom(value);
+        }}
+      />
+    </div>
+  </aside>
+
+  <main className="product-grid" >
+    <h1></h1>
+    {error && <p className="error-message">{error}</p>}
+    <div className="products">
+      {products.map((prod) => (
+  <div key={prod._id} className="product-card">
+    <Link href={`/products/${prod._id}`} passHref legacyBehavior>
+      <a style={{ textDecoration: 'none', color: 'inherit' }}>
+        <img
+          src={prod.imageUrl || '/default-image.jpg'}
+          alt={prod.name}
+          data-product-id={prod._id}
+          className="product-image"
+        />
+        <h3 className="product-name">{prod.name}</h3>
+        <p className="product-description">{prod.description}</p>
+        {prod.discountedPrice !== undefined && prod.discountedPrice < prod.price ? (
+          <p className="product-price">
+            <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+              ${prod.price.toLocaleString('es-AR')}
+            </span>
+            <span style={{ fontWeight: 'bold', color: 'green' }}>
+              ${prod.discountedPrice.toLocaleString('es-AR')}
+            </span>
+          </p>
+        ) : (
+          <p className="product-price">${prod.price.toLocaleString('es-AR')}</p>
+        )}
+        <p className="product-stock">Stock: {prod.stock}</p>
+      </a>
+    </Link>
+    <button className="btn btn-buy" onClick={() => handleAddToCart(prod._id)}>
+      Agregar producto al carrito
+    </button>
   </div>
-</div>
+))}
 
-      </div>
+    </div>
+  </main>
+
+</div>
 
       {isAdmin && (
         <div className="create-brand-form">
@@ -340,12 +353,28 @@ const [priceFrom, setPriceFrom] = useState<string>('');
           <button className="btn btn-delete" onClick={() => handleDeleteCategory(cat._id)}>Eliminar Categoría</button>
         </div>
       </div>
+      
     ))}
+  </div>
+)}
+
+{showLoginModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>Iniciar sesión requerido</h2>
+      <p>Debes iniciar sesión o registrarte para agregar productos al carrito.</p>
+      <div className="modal-buttons">
+        <button className="btn btn-buy" onClick={() => router.push('/login')}>Iniciar sesión</button>
+        <button className="btn btn-buy" onClick={() => router.push('/register')}>Registrarme</button>
+        <button className="btn btn-buy" onClick={() => setShowLoginModal(false)}>Cancelar</button>
+      </div>
+    </div>
   </div>
 )}
      
       <Footer />
     </div>
+    
   );
 };
 

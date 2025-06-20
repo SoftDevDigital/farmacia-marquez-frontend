@@ -184,6 +184,60 @@ const AffiliatesPage = () => {
       setError('Error al eliminar el afiliado');
     }
   };
+  const handleCreateAffiliate = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    setError('No estás autenticado');
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.farmaciamarquezcity.com/affiliates',
+      affiliateData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.status === 201 || response.status === 200) {
+      alert('Afiliado creado con éxito');
+      setAffiliates([...affiliates, response.data]);
+      setAffiliateData({  // limpiar formulario
+        firstName: '',
+        lastName: '',
+        dni: '',
+        birthDate: '',
+        gender: '',
+        phoneNumber: '',
+        email: '',
+        address: {
+          street: '',
+          streetNumber: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          country: '',
+          apartment: '',
+        },
+        healthInsurance: {
+          name: '',
+          affiliateNumber: '',
+          plan: '',
+        },
+      });
+    } else {
+      alert('Error al crear el afiliado');
+    }
+  } catch (err) {
+    console.error(err);
+    setError('Hubo un error al crear el afiliado');
+  }
+};
 
   return (
     <div>
@@ -194,7 +248,7 @@ const AffiliatesPage = () => {
         {isAdmin && (
           <div className="create-affiliate-form">
             <h2>{editingAffiliateId ? 'Editar Afiliado' : 'Crear Nuevo Afiliado'}</h2>
-            <form onSubmit={handleUpdateAffiliate}>
+            <form onSubmit={editingAffiliateId ? handleUpdateAffiliate : handleCreateAffiliate}>
               <div>
                 <label>Nombre</label>
                 <input
@@ -384,7 +438,9 @@ const AffiliatesPage = () => {
                   required
                 />
               </div>
-              <button className="btn btn-buy" type="submit">Actualizar Afiliado</button>
+              <button className="btn btn-buy" type="submit">
+  {editingAffiliateId ? 'Actualizar Afiliado' : 'Crear Afiliado'}
+</button>
             </form>
           </div>
         )}

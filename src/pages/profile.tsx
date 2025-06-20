@@ -58,11 +58,39 @@ const [error, setError] = useState('');
   fetchOrders();
 }, []);
 
+
+useEffect(() => {
+  const token = localStorage.getItem('USER_TOKEN');
+
+  if (!token) {
+    router.push('/login');
+    return;
+  }
+
+  const fetchUserProfile = async () => {
+    try {
+      const res = await axios.get('https://api.farmaciamarquezcity.com/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserData(res.data); // ← aquí sí viene shippingInfo
+    } catch (err) {
+      console.error('Error al obtener datos del perfil', err);
+      setError('No se pudieron cargar los datos del usuario');
+    }
+  };
+
+  fetchUserProfile();
+}, []);
+
+
   return (
     <div className="profile-page">
       <Header onSearch={() => {}} />
 
-      <main className="profile-container">
+      <main className="profile-container" style={{ paddingTop: '140px' }}>
         <h1 className="profile-title">Mi perfil</h1>
         <p className="profile-description">Aquí podés ver y editar tu información personal.</p>
 
@@ -109,6 +137,42 @@ const [error, setError] = useState('');
       </ul>
     </div>
   ))
+)}
+
+{userData?.shippingInfo && (
+  <div className="profile-card" style={{ marginTop: '2rem' }}>
+    <h2>Información de Envío</h2>
+    <div className="profile-info">
+      <label>Nombre del destinatario:</label>
+      <span>{userData.shippingInfo.recipientName}</span>
+    </div>
+    <div className="profile-info">
+      <label>Teléfono:</label>
+      <span>{userData.shippingInfo.phoneNumber}</span>
+    </div>
+    <div className="profile-info">
+      <label>Documento:</label>
+      <span>{userData.shippingInfo.documentNumber}</span>
+    </div>
+    <div className="profile-info">
+      <label>Dirección:</label>
+      <span>
+        {userData.shippingInfo.street} {userData.shippingInfo.streetNumber}, {userData.shippingInfo.apartment}
+      </span>
+    </div>
+    <div className="profile-info">
+      <label>Ciudad / Provincia / CP:</label>
+      <span>{userData.shippingInfo.city}, {userData.shippingInfo.state}, {userData.shippingInfo.postalCode}</span>
+    </div>
+    <div className="profile-info">
+      <label>País:</label>
+      <span>{userData.shippingInfo.country}</span>
+    </div>
+    <div className="profile-info">
+      <label>Notas adicionales:</label>
+      <span>{userData.shippingInfo.additionalNotes}</span>
+    </div>
+  </div>
 )}
 
       </main>

@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/router';
+import ModalLoginRequired from '../components/ModalLoginRequired'; 
 
 const CartPage: FC = () => {
   const [cart, setCart] = useState<any>(null); // Estado para el carrito
@@ -11,6 +12,7 @@ const CartPage: FC = () => {
   const [loading, setLoading] = useState<boolean>(true); // Estado de carga mientras obtenemos los datos
   const router = useRouter();
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const [shippingInfo, setShippingInfo] = useState({
     recipientName: '',
     phoneNumber: '',
@@ -84,8 +86,14 @@ const CartPage: FC = () => {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    setShowLoginModal(true); // muestra el modal si no está logueado
+    return;
+  }
+
+  fetchCart();
+}, []);
   // Función para actualizar la cantidad de un producto en el carrito
   const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -263,7 +271,7 @@ const CartPage: FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onSearch={() => {}} />
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, paddingTop: '140px' }}>
       <div className="cart-page">
         <h1>Mi Carrito</h1>
         {loading ? (
@@ -398,6 +406,7 @@ const CartPage: FC = () => {
        
       </div>
       </main>
+      {showLoginModal && <ModalLoginRequired onClose={() => setShowLoginModal(false)} />}
       <Footer />
     </div>
   );

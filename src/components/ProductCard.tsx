@@ -365,7 +365,7 @@ if (productImage && cartIcon) {
   return (
     <div>
      
-      <div className="products-page">
+      <div className="products-page" style={{ paddingTop: '100px' }}>
         <aside className="sidebar">
           <h2>Categorías</h2>
          <select className="filter-select" onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
@@ -413,11 +413,7 @@ if (productImage && cartIcon) {
 
         <main className="product-grid">
           <div className="grid-header">
-            <h1>Productos</h1>
-            <div className="sort-options">
-              
-            
-            </div>
+      
           </div>
 
          <div className="products">
@@ -497,7 +493,7 @@ if (productImage && cartIcon) {
             <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
           </>
         )}
-        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Comprar</button>
+        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Agregar producto al carrito</button>
       </div>
     </div>
   ))}

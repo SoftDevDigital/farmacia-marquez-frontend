@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useCart } from '@/context/CartContext';
 
 
+
 const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -14,6 +15,7 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const { cartCount } = useCart();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 const [userName, setUserName] = useState<string | null>(null);
+const { fetchCartCount } = useCart();
 
 useEffect(() => {
   const token = localStorage.getItem('USER_TOKEN');
@@ -25,6 +27,7 @@ useEffect(() => {
       if (decodedToken?.role === 'ADMIN') {
         setIsAdmin(true);
       }
+      fetchCartCount(); // ✅ refresca el contador al cargar
     } catch (error) {
       console.error('Error al verificar el token:', error);
       setIsAuthenticated(false);
@@ -90,54 +93,53 @@ const handleResultClick = (productId: string) => {
   <img src="/farmacia.png" alt="Farmacia Marquez City Logo" className="logo-img" />
   <span className="logo-text">Farmacia Marquez City</span>
 </Link>
-<div className="search-bar" style={{ position: 'relative' }}>
-          <input
-            type="text"
-            placeholder="¿Qué estás buscando?"
-            className="search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
-            onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} // Retraso para permitir clics en el dropdown
-          />
-       
+{!['/login', '/register', '/forgot-password'].includes(router.pathname) && (
+  <div className="search-bar" style={{ position: 'relative' }}>
+    <input
+      type="text"
+      placeholder="¿Qué estás buscando?"
+      className="search-input"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      onFocus={() => searchResults.length > 0 && setIsDropdownOpen(true)}
+      onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+    />
 
-          {isDropdownOpen && searchResults.length > 0 && (
-            <div
-              className="search-dropdown"
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                backgroundColor: 'white',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                maxHeight: '200px',
-                overflowY: 'auto',
-                zIndex: 1000,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              }}
-            >
-              {searchResults.map((product) => (
-                <div
-                  key={product._id}
-                  className="search-result-item"
-                  style={{
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    borderBottom: '1px solid #eee',
-                  }}
-                  onMouseDown={() => handleResultClick(product._id)} // Usar onMouseDown para evitar el blur del input
-                >
-                  {product.name} - ${product.price}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-
+    {isDropdownOpen && searchResults.length > 0 && (
+      <div
+        className="search-dropdown"
+        style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          backgroundColor: 'white',
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          maxHeight: '200px',
+          overflowY: 'auto',
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        }}
+      >
+        {searchResults.map((product) => (
+          <div
+            key={product._id}
+            className="search-result-item"
+            style={{
+              padding: '8px 12px',
+              cursor: 'pointer',
+              borderBottom: '1px solid #eee',
+            }}
+            onMouseDown={() => handleResultClick(product._id)}
+          >
+            {product.name} - ${product.price}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
         <div className="user-options">
         {isAuthenticated ? (
