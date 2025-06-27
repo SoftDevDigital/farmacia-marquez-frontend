@@ -33,6 +33,11 @@ const AffiliatesPage = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [editingAffiliateId, setEditingAffiliateId] = useState<string | null>(null); // ID del afiliado que estamos editando
   const router = useRouter();
+  const [affiliateToDelete, setAffiliateToDelete] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+  const [dniError, setDniError] = useState<string | null>(null);
+  const [birthDateError, setBirthDateError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchAffiliates = async () => {
@@ -233,10 +238,23 @@ const AffiliatesPage = () => {
     } else {
       alert('Error al crear el afiliado');
     }
-  } catch (err) {
-    console.error(err);
+ } catch (err: any) {
+  console.error(err);
+
+  const backendMessage = err?.response?.data?.message;
+
+  // Limpia errores anteriores
+  setDniError(null);
+  setBirthDateError(null);
+
+  if (backendMessage?.includes('DNI')) {
+    setDniError(backendMessage);
+  } else if (backendMessage?.includes('mayor de 18 años')) {
+    setBirthDateError(backendMessage);
+  } else {
     setError('Hubo un error al crear el afiliado');
   }
+}
 };
 
   return (
@@ -272,27 +290,31 @@ const AffiliatesPage = () => {
                 />
               </div>
               <div>
-                <label>DNI</label>
-                <input
-                  type="text"
-                  value={affiliateData.dni}
-                  onChange={(e) =>
-                    setAffiliateData({ ...affiliateData, dni: e.target.value })
-                  }
-                  required
-                />
-              </div>
+  <label>DNI</label>
+  <input
+    type="text"
+    value={affiliateData.dni}
+    onChange={(e) => {
+      setAffiliateData({ ...affiliateData, dni: e.target.value });
+      setDniError(null); // limpia el error al modificar
+    }}
+    required
+  />
+  {dniError && <p style={{ color: 'red', marginTop: '4px' }}>{dniError}</p>}
+</div>
               <div>
-                <label>Fecha de nacimiento</label>
-                <input
-                  type="date"
-                  value={affiliateData.birthDate}
-                  onChange={(e) =>
-                    setAffiliateData({ ...affiliateData, birthDate: e.target.value })
-                  }
-                  required
-                />
-              </div>
+  <label>Fecha de nacimiento</label>
+  <input
+    type="date"
+    value={affiliateData.birthDate}
+    onChange={(e) => {
+      setAffiliateData({ ...affiliateData, birthDate: e.target.value });
+      setBirthDateError(null); // limpia error al escribir
+    }}
+    required
+  />
+  {birthDateError && <p style={{ color: 'red', marginTop: '4px' }}>{birthDateError}</p>}
+</div>
               <div>
                 <label>Género</label>
                 <input
@@ -454,7 +476,9 @@ const AffiliatesPage = () => {
                 <p>Teléfono: {affiliate.phoneNumber}</p>
                 <p>Dirección: {affiliate.address.street}, {affiliate.address.city}</p>
                 <button className="btn btn-buy" onClick={() => handleEditAffiliate(affiliate._id)}>Editar</button>
-                <button className="btn btn-buy" onClick={() => handleDeleteAffiliate(affiliate._id)}>Eliminar</button>
+                <button className="btn btn-buy" onClick={() => setAffiliateToDelete(affiliate._id)}>
+  Eliminar
+</button>
               </div>
             ))}
           </div>
@@ -462,6 +486,55 @@ const AffiliatesPage = () => {
           <p>No hay afiliados disponibles</p>
         )}
       </div>
+
+{affiliateToDelete && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>¿Eliminar afiliado?</h2>
+      <p>Esta acción no se puede deshacer.</p>
+      <div className="modal-buttons">
+        <button
+          className="btn btn-delete"
+          onClick={async () => {
+            const token = localStorage.getItem('USER_TOKEN');
+            try {
+              const response = await axios.delete(
+                `https://api.farmaciamarquezcity.com/affiliates/${affiliateToDelete}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+
+              if (response.status === 200) {
+                setAffiliates(affiliates.filter((a) => a._id !== affiliateToDelete));
+                setShowSuccessMessage(true);
+                setTimeout(() => setShowSuccessMessage(false), 3000);
+              } else {
+                alert('Hubo un problema al eliminar el afiliado');
+              }
+            } catch (err) {
+              console.error(err);
+              alert('Error al eliminar el afiliado');
+            } finally {
+              setAffiliateToDelete(null);
+            }
+          }}
+        >
+          Sí, eliminar
+        </button>
+        <button
+          className="btn btn-buy"
+          onClick={() => setAffiliateToDelete(null)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       <Footer />
     </div>
   );

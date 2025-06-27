@@ -28,6 +28,7 @@ const Categories: FC = () => {
   const router = useRouter();
   const { fetchCartCount } = useCart();
 const [priceFrom, setPriceFrom] = useState<string>('');
+const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -279,7 +280,7 @@ const [priceFrom, setPriceFrom] = useState<string>('');
     </div>
   </aside>
 
-  <main className="product-grid" >
+  <main className="product-grid"  className="px-4 md:px-8 max-w-screen-xl mx-auto">
     <h1></h1>
     {error && <p className="error-message">{error}</p>}
     <div className="products">
@@ -350,7 +351,12 @@ const [priceFrom, setPriceFrom] = useState<string>('');
             setCategoryData({ name: cat.name, subcategories: cat.subcategories.map((sub: any) => ({ ...sub })) });
             setEditingCategory(cat._id);
           }}>Editar Categoría</button>
-          <button className="btn btn-delete" onClick={() => handleDeleteCategory(cat._id)}>Eliminar Categoría</button>
+          <button
+  className="btn btn-delete"
+  onClick={() => setCategoryToDelete(cat._id)}
+>
+  Eliminar Categoría
+</button>
         </div>
       </div>
       
@@ -371,6 +377,50 @@ const [priceFrom, setPriceFrom] = useState<string>('');
     </div>
   </div>
 )}
+
+{categoryToDelete && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>¿Estás seguro de eliminar esta categoría?</h2>
+      <div className="modal-buttons">
+        <button
+          className="btn btn-delete"
+          onClick={async () => {
+            const token = localStorage.getItem('USER_TOKEN');
+            if (!token) return;
+
+            try {
+              const res = await axios.delete(
+                `https://api.farmaciamarquezcity.com/categories/${categoryToDelete}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+              if (res.status === 204 || res.status === 200) {
+                setCategories(categories.filter(c => c._id !== categoryToDelete));
+              } else {
+                alert('Error al eliminar la categoría');
+              }
+            } catch (err) {
+              console.error('Error al eliminar la categoría', err);
+            } finally {
+              setCategoryToDelete(null);
+            }
+          }}
+        >
+          Sí, eliminar
+        </button>
+        <button className="btn btn-buy" onClick={() => setCategoryToDelete(null)}>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
      
       <Footer />
     </div>
