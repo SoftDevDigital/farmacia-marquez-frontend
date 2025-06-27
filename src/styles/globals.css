@@ -301,7 +301,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: 77px;
 }
 
 .form-group input {
@@ -561,6 +561,7 @@
 
 .login-form {
   width: 100%;
+      margin: 87px;
   max-width: 28rem;
 }
 
@@ -638,6 +639,7 @@
   color: #14b8a6;
   margin-top: 0.5rem;
   text-decoration: none;
+  
 }
 
 .forgot-password:hover {
@@ -891,6 +893,7 @@
 .forgot-password-form {
   width: 100%;
   max-width: 28rem;
+  margin: 85px;
 }
 
 .breadcrumb {
@@ -1912,7 +1915,7 @@ button:hover {
 }
 
 .cart-item-info h3 {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   color: #1a202c;
   margin: 0;
@@ -2328,7 +2331,7 @@ html, body {
   padding: 6px 12px;
   font-size: 13px;
   border-radius: 6px;
-  width: auto;
+  width: 10px;
   min-width: 100px;
 }
 
@@ -2450,3 +2453,92 @@ html, body {
   margin-top: 12px;
 }
 
+
+
+
+/* ========== MOBILE 375px ========== */
+@media screen and (max-width: 400px) {
+  .filters-container {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  .products-container {
+    width: 100% !important;
+    flex-direction: column !important;
+  }
+
+  .product-card {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  .filters-container select,
+  .filters-container input {
+    width: 100% !important;
+  }
+
+  .search-bar {
+    max-width: 100% !important;
+    margin: 10px 0;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cart-icon {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 999;
+  }
+}
+
+
+/* === Universal Mobile Responsiveness === */
+@media (max-width: 767px) {
+  .header-top,
+  .header-nav,
+  .promo-banner,
+  .products-container,
+  .footer {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .header-top {
+    gap: 12px;
+  }
+
+  .search-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+  }
+
+  .search-input {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 0 12px !important;
+    font-size: 16px !important;
+    text-align: center;
+  }
+
+  .cart-count {
+    top: -6px;
+    right: -6px;
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+
+  .footer {
+    padding: 2rem 1rem;
+    gap: 12px;
+  }
+}
