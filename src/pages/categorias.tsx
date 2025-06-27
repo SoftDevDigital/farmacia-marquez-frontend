@@ -280,7 +280,7 @@ const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
     </div>
   </aside>
 
-  <main className="product-grid"  className="px-4 md:px-8 max-w-screen-xl mx-auto">
+  <main className="product-grid" >
     <h1></h1>
     {error && <p className="error-message">{error}</p>}
     <div className="products">

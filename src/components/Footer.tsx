@@ -3,9 +3,9 @@ import Link from 'next/link';
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="flex flex-col md:flex-row justify-between gap-6 px-4 py-6 bg-gray-100 text-sm text-gray-800">
+      <div className="footer-container">
         
-        <div className="w-full md:w-1/3 space-y-2">
+        <div className="footer-column">
           <h3>¿Dónde estamos?</h3>
           
           <a
@@ -19,7 +19,7 @@ const Footer = () => {
         </div>
 
         
-        <div className="w-full md:w-1/3 space-y-2">
+        <div className="footer-column">
           <h3>Menú</h3>
           <ul>
             <li><Link href="/">Inicio</Link></li>
@@ -32,7 +32,7 @@ const Footer = () => {
         </div>
 
        
-        <div className="w-full md:w-1/3 space-y-2">
+        <div className="footer-column">
           <h3>Contactanos</h3>
           <p className="contact-info">
             <svg fill="currentColor" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@ const Footer = () => {
         </div>
 
         
-        <div className="w-full md:w-1/3 space-y-2">
+        <div className="footer-column">
           <h3>Seguinos en redes</h3>
           <div className="social-icons">
             <a href="https://www.instagram.com/marquez.city/" target="_blank" rel="noopener noreferrer">
