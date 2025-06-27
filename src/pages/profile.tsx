@@ -90,7 +90,7 @@ useEffect(() => {
     <div className="profile-page">
       <Header onSearch={() => {}} />
 
-      <main className="profile-container" style={{ paddingTop: '140px' }}>
+      <main className="profile-container" style={{ paddingTop: '179px' }}>
         <h1 className="profile-title">Mi perfil</h1>
         <p className="profile-description">Aquí podés ver y editar tu información personal.</p>
 

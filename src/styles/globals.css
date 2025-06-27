@@ -79,7 +79,7 @@
 .user-options {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 43px;
   font-size: 14px;
 }
 
@@ -102,6 +102,9 @@
 }
 
 .cart-count {
+      position: absolute;
+          right: 50px;
+
     background-color: #007bff;
   color: white;
   border-radius: 50%;
@@ -301,7 +304,11 @@
   font-size: 14px;
   font-weight: 600;
   color: #333;
+<<<<<<< HEAD
   margin-bottom: 60px;
+=======
+  margin-bottom: 77px;
+>>>>>>> 8ec2e9326cfee57b54b4f7df99d122eb4c9d1039
 }
 
 .form-group input {
@@ -314,7 +321,7 @@
 
 .create-product-form {
   background: #f9f9f9;
-  border: 1px solid #ddd;
+  border: 50px solid #ddd;
   padding: 2rem;
   margin: 2rem auto;
   border-radius: 12px;
@@ -561,6 +568,7 @@
 
 .login-form {
   width: 100%;
+      margin: 87px;
   max-width: 28rem;
 }
 
@@ -640,6 +648,7 @@
   color: #14b8a6;
   margin-top: 0.5rem;
   text-decoration: none;
+  
 }
 
 .forgot-password:hover {
@@ -893,6 +902,7 @@
 .forgot-password-form {
   width: 100%;
   max-width: 28rem;
+  margin: 85px;
 }
 
 .breadcrumb {

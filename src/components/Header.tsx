@@ -82,7 +82,11 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
       <header className="w-full px-4 py-2 bg-white shadow-md">
         <div className="flex justify-between items-center">
           
+<<<<<<< HEAD
           
+=======
+         
+>>>>>>> 8ec2e9326cfee57b54b4f7df99d122eb4c9d1039
           <nav className="hidden md:flex gap-4">
             {/* aquí irían tus enlaces normales */}
           </nav>
