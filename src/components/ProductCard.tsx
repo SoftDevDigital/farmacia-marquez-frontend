@@ -20,6 +20,8 @@ const Products: FC = () => {
   const [priceTo, setPriceTo] = useState<number>(0);
   const [error, setError] = useState('');
   const router = useRouter();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [productData, setProductData] = useState({
     name: '',
     description: '',
@@ -358,6 +360,30 @@ if (productImage && cartIcon) {
     }
   };
 
+  const confirmDeleteProduct = async () => {
+  if (!productToDelete) return;
+
+  const token = localStorage.getItem('USER_TOKEN');
+  try {
+    const res = await axios.delete(`https://api.farmaciamarquezcity.com/products/${productToDelete}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 200) {
+      setProducts(products.filter((product) => product._id !== productToDelete));
+    } else {
+      alert('Hubo un problema al eliminar el producto');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error al eliminar el producto');
+  } finally {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+  }
+};
 
 
 
@@ -490,7 +516,12 @@ if (productImage && cartIcon) {
         {isAdmin && (
           <>
             <button className="btn btn-buy" onClick={() => handleEditProduct(product._id)}>Editar</button>
-            <button className="btn btn-buy" onClick={() => handleDeleteProduct(product._id)}>Eliminar</button>
+            <button className="btn btn-buy" onClick={() => {
+  setProductToDelete(product._id);
+  setShowDeleteModal(true);
+}}>
+  Eliminar
+</button>
           </>
         )}
         <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Agregar producto al carrito</button>
@@ -640,6 +671,21 @@ if (productImage && cartIcon) {
             </form>
           </div>
         )}
+
+
+{showDeleteModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h3>¿Eliminar producto?</h3>
+   
+      <div className="modal-buttons">
+        <button className="btn btn-buy" onClick={confirmDeleteProduct}>Sí, eliminar</button>
+        <button className="btn btn-buy" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

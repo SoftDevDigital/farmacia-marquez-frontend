@@ -271,7 +271,7 @@ const CartPage: FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onSearch={() => {}} />
-        <main style={{ flex: 1, paddingTop: '140px' }}>
+        <main style={{ flex: 1, paddingTop: '140px' }} className="px-4 md:px-8 max-w-screen-xl mx-auto">
       <div className="cart-page">
         <h1>Mi Carrito</h1>
         {loading ? (
@@ -303,12 +303,19 @@ const CartPage: FC = () => {
 </label>
                     {product.name ? (
                       <>
+                      
                         <img
-                          src={product.imageUrl || '/default-image.jpg'}
-                          alt={product.name}
-                          data-product-id={product._id}
-                          className="cart-item-image"
-                        />
+  src={product.imageUrl || '/default-image.jpg'}
+  alt={product.name}
+  data-product-id={product._id}
+  style={{
+    width: '160px',
+    height: '160px',
+    objectFit: 'contain',
+    borderRadius: '10px',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)'
+  }}
+/>
                         <div className="cart-item-info">
                           <h3>{product.name}</h3>
                           <p>Precio unitario: ${product.discountedPrice ?? item.price}</p>

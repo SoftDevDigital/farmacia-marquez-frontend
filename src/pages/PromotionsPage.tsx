@@ -58,7 +58,8 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
   const [calculatedDiscount, setCalculatedDiscount] = useState(null); 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedPromotionType, setSelectedPromotionType] = useState<string>('');
-
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [promotionToDelete, setPromotionToDelete] = useState<string | null>(null);
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -258,10 +259,10 @@ const [promotionData, setPromotionData] = useState<PromotionFormData>({
     setPromotionData((prevState) => ({
       ...prevState,
       type: value,
-      buyQuantity: value === 'NXN' ? 2 : prevState.buyQuantity, 
-      getQuantity: value === 'NXN' ? 1 : prevState.getQuantity,
-      discountPercentageSecond: value === 'PERCENT_SECOND' ? 50 : prevState.discountPercentageSecond,
-      discountAmount: value === 'FIXED' ? 100 : prevState.discountAmount
+      buyQuantity: value === 'NXN' ? 1 : prevState.buyQuantity,
+      getQuantity: value === 'NXN' ? 2 : prevState.getQuantity,
+      discountPercentageSecond: value === 'PERCENT_SECOND' ? undefined : prevState.discountPercentageSecond,
+      discountAmount: value === 'FIXED' ? undefined : prevState.discountAmount
     }));
   };
 
@@ -397,6 +398,37 @@ if (productImage && cartIcon) {
   }
 };
 
+const confirmDeletePromotion = async () => {
+  if (!promotionToDelete) return;
+
+  const token = localStorage.getItem('USER_TOKEN');
+  if (!token) {
+    alert('No estás autenticado');
+    return;
+  }
+
+  try {
+    const response = await axios.delete(`https://api.farmaciamarquezcity.com/promotions/${promotionToDelete}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      alert('Promoción eliminada con éxito');
+      setPromotions(promotions.filter(promo => promo._id !== promotionToDelete));
+    } else {
+      alert('Hubo un problema al eliminar la promoción');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error al eliminar la promoción');
+  } finally {
+    setShowDeleteModal(false);
+    setPromotionToDelete(null);
+  }
+};
+
 const filteredPromotions = selectedPromotionType
   ? promotions.filter(promo => promo.type === selectedPromotionType)
   : promotions;
@@ -417,7 +449,7 @@ const filteredPromotions = selectedPromotionType
     <option value="">Todas</option>
     <option value="PERCENTAGE">Porcentaje</option>
     <option value="FIXED">Monto Fijo</option>
-    <option value="BUNDLE">Oferta por Paquete</option>
+    
     <option value="NXN">2x1</option>
     <option value="PERCENT_SECOND">2da unidad con descuento</option>
     
@@ -464,7 +496,15 @@ const filteredPromotions = selectedPromotionType
       {isAdmin && (
         <div className="promo-admin-btns">
           <button className="btn-edit" onClick={() => handleEditPromotion(promotion._id)}>Editar</button>
-          <button className="btn-delete" onClick={() => handleDeletePromotion(promotion._id)}>Eliminar</button>
+          <button
+  className="btn-delete"
+  onClick={() => {
+    setPromotionToDelete(promotion._id);
+    setShowDeleteModal(true);
+  }}
+>
+  Eliminar
+</button>
         </div>
       )}
       
@@ -501,7 +541,6 @@ const filteredPromotions = selectedPromotionType
         <select value={promotionData.type} onChange={handlePromotionTypeChange}>
           <option value="PERCENTAGE">Porcentaje</option>
           <option value="FIXED">Monto Fijo</option>
-          <option value="BUNDLE">Oferta por Paquete</option>
           <option value="NXN">2x1</option>
           <option value="PERCENT_SECOND">2da unidad con descuento</option>
         </select>
@@ -510,34 +549,96 @@ const filteredPromotions = selectedPromotionType
       {promotionData.type === 'PERCENTAGE' && (
         <div className="form-group">
           <label>Descuento (%)</label>
-          <input type="number" value={promotionData.discountPercentage} onChange={(e) => setPromotionData({ ...promotionData, discountPercentage: e.target.value })} />
+         <input
+  type="number"
+  min="0"
+  max="99"
+  step="1"
+  value={promotionData.discountPercentage}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d{0,2}$/.test(value)) {
+      setPromotionData({ ...promotionData, discountPercentage: value });
+    }
+  }}
+  inputMode="numeric"
+/>
         </div>
       )}
 
       {promotionData.type === 'FIXED' && (
         <div className="form-group">
           <label>Descuento fijo ($)</label>
-          <input type="number" value={promotionData.discountAmount} onChange={(e) => setPromotionData({ ...promotionData, discountAmount: Number(e.target.value) })} />
+        <input
+  type="number"
+  min="0"
+  max="99"
+  step="1"
+  value={promotionData.discountAmount ?? ''}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d{0,2}$/.test(value)) {
+      setPromotionData({ ...promotionData, discountAmount: value === '' ? undefined : Number(value) });
+    }
+  }}
+  inputMode="numeric"
+/>
         </div>
       )}
 
-      {promotionData.type === 'NXN' && (
-        <>
-          <div className="form-group">
-            <label>Cantidad a comprar</label>
-            <input type="number" value={promotionData.buyQuantity} onChange={(e) => setPromotionData({ ...promotionData, buyQuantity: Number(e.target.value) })} />
-          </div>
-          <div className="form-group">
-            <label>Cantidad a recibir</label>
-            <input type="number" value={promotionData.getQuantity} onChange={(e) => setPromotionData({ ...promotionData, getQuantity: Number(e.target.value) })} />
-          </div>
-        </>
-      )}
+     {promotionData.type === 'NXN' && (
+  <>
+    <div className="form-group">
+      <label>Cliente compra</label>
+      <input
+        type="number"
+        placeholder="Ej: 1"
+        value={promotionData.buyQuantity}
+        onChange={(e) =>
+          setPromotionData({
+            ...promotionData,
+            buyQuantity: Number(e.target.value),
+          })
+        }
+      />
+    </div>
+    <div className="form-group">
+      <label>Cliente recibe</label>
+      <input
+        type="number"
+        placeholder="Ej: 2"
+        value={promotionData.getQuantity}
+        onChange={(e) =>
+          setPromotionData({
+            ...promotionData,
+            getQuantity: Number(e.target.value),
+          })
+        }
+      />
+    </div>
+  </>
+)}
 
       {promotionData.type === 'PERCENT_SECOND' && (
         <div className="form-group">
           <label>Descuento 2da unidad (%)</label>
-          <input type="number" value={promotionData.discountPercentageSecond} onChange={(e) => setPromotionData({ ...promotionData, discountPercentageSecond: Number(e.target.value) })} />
+          <input
+  type="number"
+  min="0"
+  max="99"
+  step="1"
+  value={promotionData.discountPercentageSecond ?? ''}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d{0,2}$/.test(value)) {
+      setPromotionData({
+        ...promotionData,
+        discountPercentageSecond: value === '' ? undefined : Number(value),
+      });
+    }
+  }}
+  inputMode="numeric"
+/>
         </div>
       )}
 
@@ -584,6 +685,20 @@ const filteredPromotions = selectedPromotionType
     </div>
   </div>
 )}
+
+{showDeleteModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h3>Confirmar eliminación</h3>
+      <p>¿Estás seguro de que querés eliminar esta promoción?</p>
+      <div className="modal-buttons">
+        <button onClick={confirmDeletePromotion} className="btn btn-buy">Sí, eliminar</button>
+        <button onClick={() => setShowDeleteModal(false)} className="btn btn-delete">Cancelar</button>
+      </div>
+    </div>
+  </div>
+)}
+
       <Footer />
     </div>
   );

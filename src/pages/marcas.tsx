@@ -21,6 +21,7 @@ const Marcas: FC = () => {
   const [editingBrand, setEditingBrand] = useState<string | null>(null); // Estado para la marca en edición
   const { fetchCartCount } = useCart();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [brandToDelete, setBrandToDelete] = useState<string | null>(null);
 
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
@@ -363,7 +364,9 @@ setTimeout(() => {
           <h3>{brand.name}</h3>
           <div className="brand-buttons">
             <button className="btn btn-edit" onClick={() => handleEdit(brand._id)}>Editar Marca</button>
-            <button className="btn btn-delete" onClick={() => handleDelete(brand._id)}>Eliminar Marca</button>
+            <button className="btn btn-delete" onClick={() => setBrandToDelete(brand._id)}>
+  Eliminar Marca
+</button>
           </div>
         </div>
       ))
@@ -386,7 +389,46 @@ setTimeout(() => {
     </div>
   </div>
 )}
-     
+     {brandToDelete && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>¿Estás seguro de eliminar esta marca?</h2>
+      <div className="modal-buttons">
+        <button
+          className="btn btn-delete"
+          onClick={async () => {
+            const token = localStorage.getItem('USER_TOKEN');
+            try {
+              const res = await axios.delete(`https://api.farmaciamarquezcity.com/brands/${brandToDelete}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              if (res.status === 200) {
+                setBrands(brands.filter((brand) => brand._id !== brandToDelete));
+              } else {
+                alert('Hubo un problema al eliminar la marca');
+              }
+            } catch (error) {
+              console.error(error);
+              alert('Error al eliminar la marca');
+            } finally {
+              setBrandToDelete(null);
+            }
+          }}
+        >
+          Sí, eliminar
+        </button>
+        <button
+          className="btn btn-buy"
+          onClick={() => setBrandToDelete(null)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       <Footer />
     </div>
   );
