@@ -79,7 +79,7 @@
 .user-options {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 43px;
   font-size: 14px;
 }
 
@@ -102,6 +102,9 @@
 }
 
 .cart-count {
+      position: absolute;
+          right: 50px;
+
     background-color: #007bff;
   color: white;
   border-radius: 50%;
@@ -314,7 +317,7 @@
 
 .create-product-form {
   background: #f9f9f9;
-  border: 1px solid #ddd;
+  border: 50px solid #ddd;
   padding: 2rem;
   margin: 2rem auto;
   border-radius: 12px;
@@ -2453,92 +2456,3 @@ html, body {
   margin-top: 12px;
 }
 
-
-
-
-/* ========== MOBILE 375px ========== */
-@media screen and (max-width: 400px) {
-  .filters-container {
-    width: 100% !important;
-    margin-bottom: 20px;
-  }
-
-  .products-container {
-    width: 100% !important;
-    flex-direction: column !important;
-  }
-
-  .product-card {
-    width: 100% !important;
-    margin-bottom: 20px;
-  }
-
-  .filters-container select,
-  .filters-container input {
-    width: 100% !important;
-  }
-
-  .search-bar {
-    max-width: 100% !important;
-    margin: 10px 0;
-  }
-
-  .header-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .cart-icon {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    z-index: 999;
-  }
-}
-
-
-/* === Universal Mobile Responsiveness === */
-@media (max-width: 767px) {
-  .header-top,
-  .header-nav,
-  .promo-banner,
-  .products-container,
-  .footer {
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-  }
-
-  .header-top {
-    gap: 12px;
-  }
-
-  .search-bar {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 12px !important;
-  }
-
-  .search-input {
-    width: 100% !important;
-    height: 42px !important;
-    padding: 0 12px !important;
-    font-size: 16px !important;
-    text-align: center;
-  }
-
-  .cart-count {
-    top: -6px;
-    right: -6px;
-    font-size: 11px;
-    padding: 4px 6px;
-  }
-
-  .footer {
-    padding: 2rem 1rem;
-    gap: 12px;
-  }
-}
