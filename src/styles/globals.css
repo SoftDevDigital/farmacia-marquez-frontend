@@ -79,7 +79,7 @@
 .user-options {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 43px;
   font-size: 14px;
 }
 
@@ -102,6 +102,9 @@
 }
 
 .cart-count {
+      position: absolute;
+          right: 50px;
+
     background-color: #007bff;
   color: white;
   border-radius: 50%;
@@ -314,7 +317,7 @@
 
 .create-product-form {
   background: #f9f9f9;
-  border: 1px solid #ddd;
+  border: 50px solid #ddd;
   padding: 2rem;
   margin: 2rem auto;
   border-radius: 12px;
@@ -1912,7 +1915,7 @@ button:hover {
 }
 
 .cart-item-info h3 {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   color: #1a202c;
   margin: 0;
@@ -2328,7 +2331,7 @@ html, body {
   padding: 6px 12px;
   font-size: 13px;
   border-radius: 6px;
-  width: auto;
+  width: 10px;
   min-width: 100px;
 }
 
@@ -2450,3 +2453,46 @@ html, body {
   margin-top: 12px;
 }
 
+
+
+
+/* ========== MOBILE 375px ========== */
+@media screen and (max-width: 400px) {
+  .filters-container {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  .products-container {
+    width: 100% !important;
+    flex-direction: column !important;
+  }
+
+  .product-card {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  .filters-container select,
+  .filters-container input {
+    width: 100% !important;
+  }
+
+  .search-bar {
+    max-width: 100% !important;
+    margin: 10px 0;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cart-icon {
+    position: absolute;
+   
+    right: 20px;
+    z-index: 999;
+  }
+}
