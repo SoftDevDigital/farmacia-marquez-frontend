@@ -81,13 +81,8 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
     <>
       <header className="w-full px-4 py-2 bg-white shadow-md">
         <div className="flex justify-between items-center">
-          <div className="text-xl font-bold">Farmacia</div>
-          <button
-            className="md:hidden text-2xl"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            ☰
-          </button>
+       
+      
           <nav className="hidden md:flex gap-4">
             {/* aquí irían tus enlaces normales */}
           </nav>
