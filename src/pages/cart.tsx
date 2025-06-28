@@ -271,7 +271,7 @@ const CartPage: FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header onSearch={() => {}} />
-        <main style={{ flex: 1, paddingTop: '140px' }}>
+        <main style={{ flex: 1, paddingTop: '140px' }} className="px-4 md:px-8 max-w-screen-xl mx-auto">
       <div className="cart-page">
         <h1>Mi Carrito</h1>
         {loading ? (
