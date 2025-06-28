@@ -117,50 +117,28 @@ const ProductDetail = () => {
           padding: '30px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
         }}>
-          <div style={{ flex: '1 1 300px', textAlign: 'center' }}>
-            <img
-              src={product.imageUrl || '/default-image.jpg'}
-              alt={product.name}
-              style={{ maxWidth: '100%', height: 'auto', borderRadius: '10px', objectFit: 'contain' }}
-               data-product-id={product._id} 
-            />
-          </div>
+         <div className="product-container">
+  <div className="product-image">
+    <img
+      src={product.imageUrl || '/default-image.jpg'}
+      alt={product.name}
+      className="product-img"
+      data-product-id={product._id}
+    />
+  </div>
 
-          <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px', color: '#111827' }}>
-              {product.name}
-            </h1>
-            <p style={{ fontSize: '16px', color: '#4B5563', marginBottom: '20px', lineHeight: '1.6' }}>
-              {product.description}
-            </p>
-           <p style={{
-  fontSize: '36px',
-  fontWeight: '900',
-  color: '#14b8a6',
-  marginBottom: '24px',
-  textShadow: '0 1px 2px rgba(0,0,0,0.15)'
-}}>
-  ${product.price.toLocaleString('es-AR')}
-</p>
-            <button
-  onClick={handleAddToCart}
-  style={{
-    backgroundColor: '#14b8a6',
-    color: 'white',
-    fontSize: '16px',
-    padding: '12px 24px',
-    border: 'none',
-    borderRadius: '9999px',
-    cursor: 'pointer',
-    fontWeight: '600',
-    alignSelf: 'start' // para que no estire en flex-column
-  }}
->
-  Agregar producto al carrito
-</button>
+  <div className="product-info">
+    <h1 className="product-title">{product.name}</h1>
+    <p className="product-description">{product.description}</p>
+    <p className="product-price">${product.price.toLocaleString('es-AR')}</p>
+    <button className="add-to-cart-btn" onClick={handleAddToCart}>
+      Agregar producto al carrito
+    </button>
+  </div>
+</div>
           </div>
         </div>
-      </div>
+      
       </main>
       {showLoginModal && (
   <div className="modal-overlay">

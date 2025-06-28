@@ -303,12 +303,19 @@ const CartPage: FC = () => {
 </label>
                     {product.name ? (
                       <>
+                      
                         <img
-                          src={product.imageUrl || '/default-image.jpg'}
-                          alt={product.name}
-                          data-product-id={product._id}
-                          className="cart-item-image"
-                        />
+  src={product.imageUrl || '/default-image.jpg'}
+  alt={product.name}
+  data-product-id={product._id}
+  style={{
+    width: '160px',
+    height: '160px',
+    objectFit: 'contain',
+    borderRadius: '10px',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)'
+  }}
+/>
                         <div className="cart-item-info">
                           <h3>{product.name}</h3>
                           <p>Precio unitario: ${product.discountedPrice ?? item.price}</p>
