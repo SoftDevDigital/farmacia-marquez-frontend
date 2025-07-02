@@ -355,7 +355,7 @@ setTimeout(() => {
 
       <div className="product-buttons">
        
-        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Agregar producto al carrito</button>
+        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Agregar producto al carrito</button>
       </div>
     </div>
   ))}

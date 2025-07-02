@@ -134,7 +134,7 @@ const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastP
   ...rest
 } = productData;
 
-const preparedProduct = {
+const preparedProduct: any = {
   ...rest,
   price: Number(productData.price),
   stock: Number(productData.stock),
