@@ -37,6 +37,8 @@ const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<string | null>(null); // Estado para edición de productos
   const [isAdmin, setIsAdmin] = useState(false); // Verificar si el usuario tiene rol ADMIN
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+  const [currentPage, setCurrentPage] = useState(1);
+const productsPerPage = 14;
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -111,6 +113,10 @@ const [productToDelete, setProductToDelete] = useState<string | null>(null);
     return matchesCategory && matchesBrand && matchesPrice;
   });
 
+  const indexOfLastProduct = currentPage * productsPerPage;
+const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
   const filteredBrands = brands.filter((brand) => true);
 
   // Crear producto
@@ -123,12 +129,21 @@ const [productToDelete, setProductToDelete] = useState<string | null>(null);
       return;
     }
   
-    const preparedProduct = {
-      ...productData,
-      price: Number(productData.price),
-      stock: Number(productData.stock),
-      discount: Number(productData.discount) || 0,
-    };
+    const {
+  subcategoryId,
+  ...rest
+} = productData;
+
+const preparedProduct = {
+  ...rest,
+  price: Number(productData.price),
+  stock: Number(productData.stock),
+  discount: Number(productData.discount) || 0,
+};
+
+if (subcategoryId) {
+  preparedProduct.subcategoryId = subcategoryId;
+}
   
     try {
       const res = await axios.post('https://api.farmaciamarquezcity.com/products', preparedProduct, {
@@ -187,56 +202,70 @@ const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   // Actualizar producto
   const handleUpdateProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingProduct) return;
+  e.preventDefault();
+  if (!editingProduct) return;
 
-    const token = localStorage.getItem('USER_TOKEN');
-    const preparedProduct = {
-      ...productData,
-      price: Number(productData.price),
-      stock: Number(productData.stock),
-      discount: Number(productData.discount) || 0,
-    };
-    try {
-      const res = await axios.patch(
-        `https://api.farmaciamarquezcity.com/products/${editingProduct}`,
-        preparedProduct,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  const token = localStorage.getItem('USER_TOKEN');
+  
+  const {
+    subcategoryId,
+    ...rest
+  } = productData;
 
-      if (res.status === 200) {
-        alert('Producto actualizado con éxito');
-        setProducts(
-          products.map((product) =>
-            product._id === editingProduct ? res.data : product
-          )
-        );
-        setProductData({
-  name: '',
-  description: '',
-  price: '',        // ← string
-  discount: '',     // ← string
-  stock: '',        // ← string
-  imageUrl: '',
-  categoryId: '',
-  subcategoryId: '',
-  brandId: '',
-  isFeatured: false,
-});
-        setEditingProduct(null); // Resetear el estado de edición
-      } else {
-        alert('Hubo un problema al actualizar el producto');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Error al actualizar el producto');
-    }
+  const preparedProduct: any = {
+    ...rest,
+    price: Number(productData.price),
+    stock: Number(productData.stock),
+    discount: Number(productData.discount) || 0,
   };
+
+  if (subcategoryId) {
+    preparedProduct.subcategoryId = subcategoryId;
+  }
+
+  try {
+    const res = await axios.patch(
+      `https://api.farmaciamarquezcity.com/products/${editingProduct}`,
+      preparedProduct,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      alert('Producto actualizado con éxito');
+      setProducts(
+        products.map((product) =>
+          product._id === editingProduct ? res.data : product
+        )
+      );
+      setProductData({
+        name: '',
+        description: '',
+        price: '',
+        discount: '',
+        stock: '',
+        imageUrl: '',
+        categoryId: '',
+        subcategoryId: '',
+        brandId: '',
+        isFeatured: false,
+      });
+      setEditingProduct(null);
+    } else {
+      alert('Hubo un problema al actualizar el producto');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error al actualizar el producto');
+  }
+};
+
+
+
   const handleAddToCart = async (productId: string, quantity: number) => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
@@ -446,7 +475,7 @@ if (productImage && cartIcon) {
 
          <div className="products">
           
-  {filteredProducts.map((product) => (
+  {currentProducts.map((product) => (
     <div key={product._id} className="product-card">
       <Link href={`/products/${product._id}`} passHref legacyBehavior>
   <a style={{ textDecoration: 'none', color: 'inherit', position: 'relative', display: 'block' }}>
@@ -536,6 +565,18 @@ if (productImage && cartIcon) {
         
       </div>
 
+      <div className="pagination">
+  {Array.from({ length: Math.ceil(filteredProducts.length / productsPerPage) }, (_, i) => (
+    <button
+      key={i + 1}
+      onClick={() => setCurrentPage(i + 1)}
+      className={`pagination-button ${currentPage === i + 1 ? 'active' : ''}`}
+    >
+      {i + 1}
+    </button>
+  ))}
+</div>
+
       {showLoginModal && (
   <div className="modal-overlay">
     <div className="modal-content">
@@ -581,7 +622,7 @@ if (productImage && cartIcon) {
     }
   }}
   placeholder="Precio"
-  required
+  
 />
 </div>
 
@@ -602,7 +643,7 @@ if (productImage && cartIcon) {
     }
   }}
   placeholder="Cantidad disponible"
-  required
+  
 />
 </div>
 

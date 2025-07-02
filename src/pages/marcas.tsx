@@ -23,6 +23,12 @@ const Marcas: FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [brandToDelete, setBrandToDelete] = useState<string | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+const productsPerPage = 14;
+
+
+  
+
   // Verificar si el usuario tiene rol ADMIN
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -161,18 +167,20 @@ const Marcas: FC = () => {
   };
 
   // Filtrado de productos
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
-    const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
-    const from = parseFloat(priceFrom || '0');
-const matchesPrice = product.price >= from && product.price <= priceTo;
+ 
+const filteredProducts = products.filter((product) => {
+  const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
+  const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
+  const from = parseFloat(priceFrom || '0');
+  const matchesPrice = product.price >= from && product.price <= priceTo;
 
-    return matchesCategory && matchesBrand && matchesPrice;
-  });
+  return matchesCategory && matchesBrand && matchesPrice;
+});
 
-  const filteredBrands = brands.filter((brand) => {
-    return true; 
-  });
+// PAGINACIÓN
+const indexOfLastProduct = currentPage * productsPerPage;
+const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   const handleAddToCart = async (productId: string) => {
   const token = localStorage.getItem('USER_TOKEN');
@@ -259,7 +267,7 @@ setTimeout(() => {
   value={selectedBrand}
 >
   <option value="">Todas las marcas</option>
-  {filteredBrands.map((brand) => (
+  {brands.map((brand) => (
     <option key={brand._id} value={brand._id}>
       {brand.name}
     </option>
@@ -306,39 +314,67 @@ setTimeout(() => {
             
                    </div>
 
-          <div className="products">
-          {filteredProducts.map((product) => (
-  <div key={product._id} className="product-card">
-    <Link href={`/products/${product._id}`} passHref legacyBehavior>
-      <a style={{ textDecoration: 'none', color: 'inherit' }}>
-        <img src={product.imageUrl || '/default-image.jpg'} alt={product.name} data-product-id={product._id} className="product-image" />
-        <h3 className="product-name">{product.name}</h3>
-        <p className="product-description">{product.description}</p>
-        {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
-          <p className="product-price">
-            <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
-              ${product.price.toLocaleString('es-AR')}
-            </span>
-            <span style={{ fontWeight: 'bold', color: 'green' }}>
-              ${product.discountedPrice.toLocaleString('es-AR')}
-            </span>
-          </p>
-        ) : (
-          <p className="product-price">
-            ${product.price.toLocaleString('es-AR')}
-          </p>
-        )}
-        <p className="product-stock">Stock: {product.stock}</p>
-      </a>
-    </Link>
-    <button className="btn btn-buy" onClick={() => handleAddToCart(product._id)}>Agregar producto al carrito</button>
-  </div>
-))}
-          </div>
+         <div className="products">
+     {currentProducts.map((product) => (
+    <div key={product._id} className="product-card">
+      <Link href={`/products/${product._id}`} passHref legacyBehavior>
+  <a style={{ textDecoration: 'none', color: 'inherit', position: 'relative', display: 'block' }}>
+   
+
+
+    <img src={product.imageUrl} alt={product.name} data-product-id={product._id} className="product-image" />
+    <h3 className="product-name">{product.name}</h3>
+    <p className="product-description">
+      {product.description.length > 40
+        ? product.description.slice(0, 40) + '...'
+        : product.description}
+    </p>
+    {product.discountedPrice !== undefined && product.discountedPrice < product.price ? (
+      <p className="product-price">
+        <span style={{ textDecoration: 'line-through', color: 'gray', marginRight: '8px' }}>
+          ${product.price.toLocaleString('es-AR')}
+        </span>
+        <span style={{ fontWeight: 'bold', color: 'green' }}>
+          ${product.discountedPrice.toLocaleString('es-AR')}
+        </span>
+      </p>
+    ) : (
+      <p className="product-price">
+        ${product.price.toLocaleString('es-AR')}
+      </p>
+    )}
+    <p className="product-stock">Stock: {product.stock}</p>
+    {product.installment && (
+      <p className="installment">
+        3 cuotas sin interés de ${product.installment.price.toLocaleString('es-AR')}
+      </p>
+    )}
+  </a>
+</Link>
+
+
+      <div className="product-buttons">
+       
+        <button className="btn btn-buy" onClick={() => handleAddToCart(product._id, 1)}>Agregar producto al carrito</button>
+      </div>
+    </div>
+  ))}
+</div>
         </main>
 
-       
+     
         </div>
+          <div className="pagination">
+  {Array.from({ length: Math.ceil(filteredProducts.length / productsPerPage) }, (_, i) => (
+    <button
+      key={i}
+      className={`pagination-button ${currentPage === i + 1 ? 'active' : ''}`}
+      onClick={() => setCurrentPage(i + 1)}
+    >
+      {i + 1}
+    </button>
+  ))}
+</div>
          {isAdmin && (
           <div className="create-brand-form">
             <h3>{editingBrand ? 'Editar Marca' : 'Crear Marca'}</h3>
