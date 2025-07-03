@@ -2312,3 +2312,64 @@
   white-space: normal;
   padding-right: 10px;
 }
+
+@media (max-width: 768px) {
+  .pagination {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 8px;
+    gap: 8px;
+    justify-content: flex-start;
+    scroll-snap-type: x mandatory;
+  }
+
+  .pagination-button {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    padding: 0;
+    margin: 0;
+    border-top: none;
+    background-color: white;
+  }
+
+  .nav-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 4px 8px;
+    gap: 8px;
+    height: 58px;
+    align-items: center;
+    scrollbar-width: none;
+  }
+
+  .nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-list li {
+    margin: 0;
+  }
+
+  .nav-list li a {
+    font-size: 13px;
+    padding: 6px 10px;
+    line-height: 1;
+    background-color: #f1f5f9;
+    border-radius: 20px;
+    color: #0a4a7e;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .logo-text {
+    font-size: 16px;
+  }
+}

@@ -162,44 +162,44 @@ const [promotionToDelete, setPromotionToDelete] = useState<string | null>(null);
     }
   
     try {
-      const response = await axios.post(
-        'https://api.farmaciamarquezcity.com/promotions',
-        preparedPromotion,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
-      if (response.status === 201) {
-        alert('Promoción creada con éxito');
-        setPromotions([...promotions, response.data]);
-        
-        setTimeout(() => {
-    fetchAllPromoProducts();
-  }, 500);
-
-        setPromotionData({
-          _id: '',
-          title: '',
-          description: '',
-          discountPercentage: '',
-          startDate: '',
-          endDate: '',
-          productIds: [],
-          type: 'PERCENTAGE',
-          isActive: true,
-        });
-      } else {
-        alert('Hubo un problema al crear la promoción');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Error al crear la promoción');
+       const response = await axios.post(
+    'https://api.farmaciamarquezcity.com/promotions',
+    preparedPromotion,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     }
-  };
+  );
+
+  if (response.status === 201) {
+    alert('Promoción creada con éxito');
+
+    const updatedPromos = await axios.get('https://api.farmaciamarquezcity.com/promotions');
+    setPromotions(updatedPromos.data);
+
+    setTimeout(() => {
+      fetchAllPromoProducts();
+    }, 1000);
+
+    setPromotionData({
+      _id: '',
+      title: '',
+      description: '',
+      discountPercentage: '',
+      startDate: '',
+      endDate: '',
+      productIds: [],
+      type: 'PERCENTAGE',
+      isActive: true,
+    });
+  }
+} catch (error) {
+  console.error(error);
+  alert('Error al crear la promoción');
+}
+};
 
   const handleUpdatePromotion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,10 +209,13 @@ const [promotionToDelete, setPromotionToDelete] = useState<string | null>(null);
       return;
     }
   
-    const updatedPromotionData = {
-      ...promotionData,
-   productIds: promotionData.productIds,
-    };
+   const updatedPromotionData = {
+  ...promotionData,
+  discountPercentage: promotionData.discountPercentage
+    ? Number(promotionData.discountPercentage)
+    : undefined,
+  productIds: promotionData.productIds,
+};
   
     try {
       const response = await axios.patch(
@@ -698,11 +701,12 @@ const filteredPromotions = selectedPromotionType
     </div>
   </div>
 )}
-
       <Footer />
     </div>
   );
+    
 };
+  
 
 
 export default PromotionsPage;
