@@ -2373,3 +2373,93 @@
     font-size: 16px;
   }
 }
+
+.nosotros-container {
+  background-color: #f9fafb;
+  padding: 32px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nosotros-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.nosotros-image-container {
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.nosotros-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 320px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.nosotros-subtitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.nosotros-text {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.nosotros-block {
+  margin-top: 32px;
+}
+
+.nosotros-block h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #111827;
+  text-align: center;
+}
+
+.nosotros-block p {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.7;
+  text-align: justify;
+  margin: 0 auto;
+  max-width: 750px;
+  padding: 0 8px;
+}
+
+/* RESPONSIVE TWEAKS */
+@media (max-width: 480px) {
+  .nosotros-title {
+    font-size: 1.5rem;
+  }
+
+  .nosotros-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .nosotros-block h3 {
+    font-size: 1.1rem;
+  }
+
+  .nosotros-text,
+  .nosotros-block p {
+    font-size: 0.95rem;
+    text-align: left;
+  }
+}

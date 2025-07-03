@@ -1,7 +1,6 @@
 import Footer from '@/components/Footer';
 import Header from '../components/Header';
 
-
 const Nosotros = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -12,38 +11,33 @@ const Nosotros = () => {
 
         <div className="nosotros-image-container">
           <img
-            src="/farmacia-zentner-illustration.jpg"
-            alt="Farmacia Zentner Illustration"
-            className="nosotros-image"
-          />
+  src="/marquez.png"
+  alt="Farmacia Marquez City"
+  className="nosotros-image"
+/>
         </div>
 
-        <h2 className="nosotros-subtitle">Nuestra prioridad, tu bienestar</h2>
+        <h2 className="nosotros-subtitle">Estamos cerca. Siempre.</h2>
 
         <p className="nosotros-text">
-          En el corazón de Santa Fe, en la esquina de San Jerónimo y Suipacha,
-          nos encontramos desde hace más de 70 años, comprometidos con tu salud
-          y bienestar.
+          En la zona norte de Santa Fe, sobre Blas Parera 8448, justo frente a los hospitales Mira y López y Nuevo Iturraspe, nos encontrás todos los días para lo que necesites.
         </p>
+        <p className="nosotros-text">📍 Lunes a viernes, de 8 a 00 hs</p>
+        <p className="nosotros-text">📍 Sábados, de 8 a 20 hs</p>
 
         <div className="nosotros-block">
-          <h3>Líderes en Dermocosmética</h3>
+          <h3>Más que una farmacia, un equipo que te acompaña</h3>
           <p>
-            Somos referentes en la región y hemos sido reconocidos a nivel nacional por nuestros estándares de excelencia. En 2018, La Roche Posay nos distinguió como uno de los tres mejores centros de dermocosmética de Argentina. Además, L’Oreal Paris nos seleccionó para ser el primer Dermacenter del país.
+            En MarquezCity nos mueve el compromiso con tu salud. Sabemos que cada persona que entra a nuestra farmacia busca mucho más que un medicamento: busca atención, orientación y tranquilidad.
+            Por eso, trabajamos con un equipo capacitado y cercano, que te escucha y te ayuda a encontrar la mejor solución para vos y tu familia.
           </p>
         </div>
 
         <div className="nosotros-block">
-          <h3>Accesibilidad e Innovación</h3>
+          <h3>Confianza que se construye día a día</h3>
           <p>
-            Nos esforzamos por estar a la vanguardia de las últimas tendencias tanto en el sector farmacéutico como en la Dermocosmética. Nuestra presencia digital es líder en el mercado, con una página web y aplicación móvil diseñadas para facilitarte el acceso a nuestros productos y servicios obteniendo mayores beneficios.
-          </p>
-        </div>
-
-        <div className="nosotros-block">
-          <h3>Tu Salud, Nuestra Prioridad</h3>
-          <p>
-            Queremos ser tu aliado en el cuidado de tu salud y bienestar. Comprometemos brindarte soluciones efectivas y personalizadas para tus necesidades y mejorar aun más tu calidad de vida. Somos farmacia ZENTNER.
+            Hace años que somos un punto de referencia en la zona, y eso no es casualidad. Estamos donde más se nos necesita, con un servicio ágil, moderno y humano.
+            Nuestra misión es simple: que siempre que pienses en farmacia, pienses en nosotros. Porque en MarquezCity, cuidarte es lo que mejor sabemos hacer.
           </p>
         </div>
       </div>
