@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import axios from 'axios';
-import jwt_decode from 'jwt-decode';  // Importa jwt-decode
+import jwt_decode from 'jwt-decode';  
 import Header from '../components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
@@ -25,21 +25,21 @@ const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [productData, setProductData] = useState({
     name: '',
     description: '',
-    price: '',         // ← antes era 0
-    discount: '',      // ← opcional también
-    stock: '',         // ← antes era 0
+    price: '',         
+    discount: '',      
+    stock: '',         
     imageUrl: '',
     categoryId: '',
     subcategoryId: '',
     brandId: '',
     isFeatured: false
   });
-  const [editingProduct, setEditingProduct] = useState<string | null>(null); // Estado para edición de productos
-  const [isAdmin, setIsAdmin] = useState(false); // Verificar si el usuario tiene rol ADMIN
+  const [editingProduct, setEditingProduct] = useState<string | null>(null); 
+  const [isAdmin, setIsAdmin] = useState(false); 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
   const [currentPage, setCurrentPage] = useState(1);
 const productsPerPage = 14;
-  // Verificar si el usuario tiene rol ADMIN
+  
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
@@ -48,14 +48,14 @@ const productsPerPage = 14;
     try {
       const decodedToken = jwt_decode(token) as { role: string };
       if (decodedToken.role === 'ADMIN') {
-        setIsAdmin(true); // Si el rol es ADMIN, habilitar la creación, eliminación y edición de productos
+        setIsAdmin(true); 
       }
     } catch (err) {
       console.error('Error al verificar el rol', err);
     }
   }, []);
 
-  // Fetch categories, products, and brands from API
+  
   useEffect(() => {
  const fetchCategoriesAndProductsAndBrands = async () => {
   try {
@@ -100,12 +100,12 @@ const productsPerPage = 14;
 
   fetchCategoriesAndProductsAndBrands();
 }, []);
-  // Filtrar productos por categoría, marca y precio
+  
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.categoryId === selectedCategory : true;
     const matchesBrand = selectedBrand ? product.brandId === selectedBrand : true;
   
-    // Asegúrate de que los valores de priceFrom y priceTo no sean 0, y que los valores ingresados sean correctos
+    
     const matchesPrice =
   (priceFrom !== '' ? product.price >= parseInt(priceFrom) : true) &&
   (priceTo > 0 ? product.price <= priceTo : true);
@@ -119,7 +119,7 @@ const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastP
 
   const filteredBrands = brands.filter((brand) => true);
 
-  // Crear producto
+  
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
   
@@ -180,7 +180,7 @@ if (subcategoryId) {
 
 
 
-  // Editar producto
+  
   const handleEditProduct = (productId: string) => {
     const product = products.find((product) => product._id === productId);
     if (product) {
@@ -196,11 +196,11 @@ if (subcategoryId) {
         brandId: product.brandId,
         isFeatured: product.isFeatured || false,
       });
-      setEditingProduct(productId); // Establecer el producto que se está editando
+      setEditingProduct(productId); 
     }
   };
 
-  // Actualizar producto
+  
   const handleUpdateProduct = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!editingProduct) return;
@@ -324,7 +324,7 @@ if (subcategoryId) {
       );
   
       if (response.status === 201) {
-        await fetchCartCount(); // ✅ actualiza el contador del carrito
+        await fetchCartCount(); 
         const productImage = document.querySelector(`img[data-product-id="${productId}"]`);
 const cartIcon = document.querySelector('.cart-icon');
 
@@ -367,7 +367,7 @@ if (productImage && cartIcon) {
     }
   };
 
-  // Eliminar producto
+  
   const handleDeleteProduct = async (productId: string) => {
     const token = localStorage.getItem('USER_TOKEN');
     try {

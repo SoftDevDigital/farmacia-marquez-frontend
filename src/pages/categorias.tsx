@@ -62,7 +62,7 @@ const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
     try {
       let url = 'https://api.farmaciamarquezcity.com/products';
 
-      // Si hay categoría seleccionada, agregamos el filtro
+      
       if (selectedCategory) {
         url += `?categoryId=${selectedCategory}`;
 
@@ -102,7 +102,7 @@ const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
     return alert('El nombre de la categoría es obligatorio');
   }
 
-  // 🧹 Filtramos subcategorías vacías
+  
   const cleanedData = {
     ...categoryData,
     subcategories: categoryData.subcategories.filter(sub => sub.name.trim() !== '')
@@ -158,7 +158,7 @@ const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        validateStatus: (status) => status < 500 // Evita que axios lance automáticamente un error por código 4xx
+        validateStatus: (status) => status < 500 
       });
   
       if (res.status === 204 || res.status === 200) {
@@ -206,9 +206,9 @@ const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
     );
 
     if (response.status === 201) {
-      await fetchCartCount(); // ✅ ACTUALIZA el contador del carrito
+      await fetchCartCount(); 
       
-      // 🔄 Animación de producto al carrito
+     
       const productImage = document.querySelector(`img[data-product-id="${productId}"]`);
       const cartIcon = document.querySelector('.cart-icon');
 

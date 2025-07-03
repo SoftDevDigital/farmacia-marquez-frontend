@@ -5,8 +5,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const AffiliatesPage = () => {
-  const [affiliates, setAffiliates] = useState<any[]>([]); // Estado para almacenar los afiliados
-  const [error, setError] = useState<string>(''); // Para manejar errores
+  const [affiliates, setAffiliates] = useState<any[]>([]); 
+  const [error, setError] = useState<string>(''); 
   const [affiliateData, setAffiliateData] = useState<any>({
     firstName: '',
     lastName: '',
@@ -29,9 +29,9 @@ const AffiliatesPage = () => {
       affiliateNumber: '',
       plan: '',
     },
-  }); // Datos para actualizar un afiliado
+  }); 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [editingAffiliateId, setEditingAffiliateId] = useState<string | null>(null); // ID del afiliado que estamos editando
+  const [editingAffiliateId, setEditingAffiliateId] = useState<string | null>(null); 
   const router = useRouter();
   const [affiliateToDelete, setAffiliateToDelete] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
@@ -49,7 +49,7 @@ const AffiliatesPage = () => {
       }
 
       try {
-        // Verificar si el rol del usuario es ADMIN
+        
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
         if (decodedToken.role !== 'ADMIN') {
           setError('No tienes permisos para acceder a esta página');
@@ -58,13 +58,13 @@ const AffiliatesPage = () => {
         }
         setIsAdmin(true);
 
-        // Realizamos la solicitud para obtener los afiliados
+        
         const response = await axios.get('https://api.farmaciamarquezcity.com/affiliates', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.status === 200) {
-          setAffiliates(response.data); // Guardar los afiliados
+          setAffiliates(response.data); 
         } else {
           setError('Error al obtener los afiliados');
         }
@@ -80,7 +80,7 @@ const AffiliatesPage = () => {
   const handleEditAffiliate = (affiliateId: string) => {
     const affiliateToEdit = affiliates.find((affiliate) => affiliate._id === affiliateId);
     if (affiliateToEdit) {
-      // Asegurar formato YYYY-MM-DD
+      
       const formattedDate = affiliateToEdit.birthDate
         ? new Date(affiliateToEdit.birthDate).toISOString().split('T')[0]
         : '';
@@ -94,7 +94,7 @@ const AffiliatesPage = () => {
     }
   };
 
-  // Función para manejar el envío del formulario de actualización de afiliado
+  
   const handleUpdateAffiliate = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -150,8 +150,8 @@ const AffiliatesPage = () => {
             affiliateNumber: '',
             plan: '',
           },
-        }); // Limpiar el formulario después de actualizar el afiliado
-        setEditingAffiliateId(null); // Limpiar el ID del afiliado a editar
+        }); 
+        setEditingAffiliateId(null); 
       } else {
         alert('Hubo un problema al actualizar el afiliado');
       }
@@ -212,7 +212,7 @@ const AffiliatesPage = () => {
     if (response.status === 201 || response.status === 200) {
       alert('Afiliado creado con éxito');
       setAffiliates([...affiliates, response.data]);
-      setAffiliateData({  // limpiar formulario
+      setAffiliateData({  
         firstName: '',
         lastName: '',
         dni: '',
@@ -243,7 +243,7 @@ const AffiliatesPage = () => {
 
   const backendMessage = err?.response?.data?.message;
 
-  // Limpia errores anteriores
+ 
   setDniError(null);
   setBirthDateError(null);
 
@@ -296,7 +296,7 @@ const AffiliatesPage = () => {
     value={affiliateData.dni}
     onChange={(e) => {
       setAffiliateData({ ...affiliateData, dni: e.target.value });
-      setDniError(null); // limpia el error al modificar
+      setDniError(null); 
     }}
     required
   />
@@ -309,7 +309,7 @@ const AffiliatesPage = () => {
     value={affiliateData.birthDate}
     onChange={(e) => {
       setAffiliateData({ ...affiliateData, birthDate: e.target.value });
-      setBirthDateError(null); // limpia error al escribir
+      setBirthDateError(null); 
     }}
     required
   />

@@ -7,9 +7,9 @@ import { useRouter } from 'next/router';
 import ModalLoginRequired from '../components/ModalLoginRequired'; 
 
 const CartPage: FC = () => {
-  const [cart, setCart] = useState<any>(null); // Estado para el carrito
-  const [error, setError] = useState<string>(''); // Estado para manejar errores
-  const [loading, setLoading] = useState<boolean>(true); // Estado de carga mientras obtenemos los datos
+  const [cart, setCart] = useState<any>(null); 
+  const [error, setError] = useState<string>(''); 
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -26,7 +26,7 @@ const CartPage: FC = () => {
     country: '',
     additionalNotes: ''
   });
-  const [showShippingForm, setShowShippingForm] = useState(false); // Estado para mostrar el formulario de envío
+  const [showShippingForm, setShowShippingForm] = useState(false); 
   const { fetchCartCount } = useCart();
   const [quantityUpdating, setQuantityUpdating] = useState<{ [key: string]: boolean }>({});
   const [quantityTimers, setQuantityTimers] = useState<{ [key: string]: NodeJS.Timeout }>({});
@@ -70,7 +70,7 @@ const CartPage: FC = () => {
   
         setCart({ ...response.data, items: cartWithProductDetails });
   
-        // 👉 INICIALIZAR SELECCIONADOS
+        
         const allProductIds = cartWithProductDetails.map((item: any) => item.productId);
         setSelectedProductIds(allProductIds);
   
@@ -88,20 +88,20 @@ const CartPage: FC = () => {
   useEffect(() => {
   const token = localStorage.getItem('USER_TOKEN');
   if (!token) {
-    setShowLoginModal(true); // muestra el modal si no está logueado
+    setShowLoginModal(true); 
     return;
   }
 
   fetchCart();
 }, []);
-  // Función para actualizar la cantidad de un producto en el carrito
+  
   const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       alert('La cantidad debe ser mayor que 0');
       return;
     }
 
-    // Actualizar la cantidad de forma instantánea en la UI
+    
     const updatedCart = { ...cart };
     const updatedItems = updatedCart.items.map((item: any) =>
       item.productId === productId ? { ...item, quantity: newQuantity } : item
@@ -109,7 +109,7 @@ const CartPage: FC = () => {
     updatedCart.items = updatedItems;
     setCart(updatedCart);
 
-    const token = localStorage.getItem('USER_TOKEN'); // Obtener el token del localStorage
+    const token = localStorage.getItem('USER_TOKEN'); 
     if (!token) {
       alert('No estás autenticado');
       return;
@@ -128,7 +128,7 @@ const CartPage: FC = () => {
       );
     
       if (response.status === 200) {
-        await fetchCart(); // 🔁 ← Esto refresca el `discountedSubtotal`
+        await fetchCart();
       } else {
         alert('Hubo un problema al actualizar la cantidad');
       }
@@ -138,15 +138,15 @@ const CartPage: FC = () => {
     }
   }
 
-  // Función para eliminar un producto del carrito
+ 
   const handleRemoveItem = async (productId: string) => {
-    const token = localStorage.getItem('USER_TOKEN'); // Obtener el token
+    const token = localStorage.getItem('USER_TOKEN'); 
     if (!token) {
       alert('No estás autenticado');
       return;
     }
 
-    // Eliminar el producto de manera instantánea en la UI
+    
     const updatedCart = { ...cart };
     updatedCart.items = updatedCart.items.filter((item: any) => item.productId !== productId);
     setCart(updatedCart);
@@ -159,7 +159,7 @@ const CartPage: FC = () => {
       });
       if (response.status === 200) {
         
-        await fetchCartCount(); // ✅ ACTUALIZA el contador
+        await fetchCartCount(); 
       }
       if (response.status === 200) {
         
@@ -172,7 +172,7 @@ const CartPage: FC = () => {
     }
   };
 
-  // Función para limpiar todo el carrito
+  
   const handleClearCart = async () => {
     const token = localStorage.getItem('USER_TOKEN');
     if (!token) {
@@ -191,7 +191,7 @@ const CartPage: FC = () => {
   
       if (response.status === 200) {
         
-        await fetchCartCount(); // actualiza contador del ícono
+        await fetchCartCount(); 
       } else {
         alert('Hubo un problema al limpiar el carrito');
       }
@@ -205,9 +205,9 @@ const CartPage: FC = () => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
 
-  // Función para mostrar el formulario de envío al hacer clic en "Iniciar Proceso de Pago"
+  
   const handleShowShippingForm = () => {
-    setShowShippingForm(true); // Mostrar formulario
+    setShowShippingForm(true); 
   };
 
  
@@ -217,24 +217,24 @@ const CartPage: FC = () => {
   const updateQuantityDebounced = (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) return;
   
-    // Clear previous timeout if exists
+   
     if (quantityTimers[productId]) {
       clearTimeout(quantityTimers[productId]);
     }
   
     setQuantityUpdating((prev) => ({ ...prev, [productId]: true }));
   
-    // Set timeout for backend update
+    
     const timer = setTimeout(() => {
       handleUpdateQuantity(productId, newQuantity)
         .finally(() => {
           setQuantityUpdating((prev) => ({ ...prev, [productId]: false }));
         });
-    }, 600); // 600ms delay
+    }, 600); 
   
     setQuantityTimers((prev) => ({ ...prev, [productId]: timer }));
   
-    // Update UI immediately
+    
     const updatedCart = { ...cart };
     updatedCart.items = updatedCart.items.map((item: any) =>
       item.productId === productId ? { ...item, quantity: newQuantity } : item
@@ -253,14 +253,14 @@ const CartPage: FC = () => {
         });
   
         if (res.data) {
-          setExistingShippingInfo(res.data); // guardar datos actuales
-          setShowShippingDecision(true); // mostrar decisión al usuario
+          setExistingShippingInfo(res.data); 
+          setShowShippingDecision(true); 
         } else {
-          setShowShippingForm(true); // si no hay datos, mostrar directamente el form
+          setShowShippingForm(true); 
         }
       } catch (error) {
         console.error('No hay información de envío previa o falló la petición');
-        setShowShippingForm(true); // por las dudas mostrar igual el form
+        setShowShippingForm(true); 
       }
     };
   
@@ -284,7 +284,7 @@ const CartPage: FC = () => {
               <p>No hay productos en el carrito</p>
             ) : (
               cart.items.map((item: any) => {
-                const product = item.product || {}; // Asegurarse de que 'product' siempre sea un objeto
+                const product = item.product || {}; 
                 return (
                   <div key={item.productId} className="cart-item">
                     <label>
