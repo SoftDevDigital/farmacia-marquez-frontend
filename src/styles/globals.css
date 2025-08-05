@@ -348,6 +348,7 @@
   .products-page {
     flex-direction: row;
     align-items: flex-start;
+    margin-top: 20px;
   }
 
   .sidebar {
@@ -2462,4 +2463,266 @@
     font-size: 0.95rem;
     text-align: left;
   }
+}
+@keyframes marquee {
+  0% { transform: translateX(100%) }
+  100% { transform: translateX(-100%) }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 15s linear infinite;
+}
+
+
+
+
+.promo-banner {
+  background-color: #16bfb1;
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.promo-text {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+}
+.white-text {
+  color: #fff;
+}
+
+
+@media (max-width: 768px) {
+  .promo-text {
+    font-size: 14px;
+    padding: 0 10px;
+    white-space: normal;
+    word-break: break-word;
+  }
+}
+
+.hero-banner {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border-radius: 0;
+  position: relative;
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: auto; /* ✅ Cambiamos esto */
+  max-height: none; /* ✅ Quitamos el límite */
+  object-fit: contain; /* ✅ Cambiamos de cover a contain */
+  margin-top: 0; /* ✅ Quitamos margen innecesario */
+  margin-top: 30px;
+  display: block;
+  margin-bottom: 35px;
+}
+
+@media (max-width: 1024px) {
+  .hero-banner-img {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-banner-img {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-banner-img {
+    max-height: 200px;
+  }
+}
+
+.benefits-section {
+  background-color: #f9f9f9;
+  padding: 20px 16px;
+  margin: 0 auto;
+  max-width: 1251px;
+  margin-bottom: 25px;
+}
+
+.benefits-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.benefit-box {
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: transform 0.2s;
+}
+
+.benefit-box:hover {
+  transform: translateY(-2px);
+}
+
+.benefit-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.benefit-box h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #111827;
+}
+
+.benefit-box p {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+@media (max-width: 480px) {
+  .benefits-container {
+    grid-template-columns: 1fr;
+  }
+
+  .benefit-box {
+    flex-direction: row;
+  }
+}
+
+.promo-image-banner {
+  width: 100%;
+  overflow: hidden;
+  margin: 0 auto 40px auto;
+  text-align: center;
+}
+
+.promo-banner-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-width: 1280px;
+
+  display: block;
+  margin: 0 auto;
+
+  margin-top: 60px;
+  border-radius: 12px;
+  margin-bottom: 50px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .promo-banner-img {
+    max-width: 100%;
+    padding: 0 12px;
+    border-radius: 0;
+  }
+}
+
+.hero-banner {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.slick-slider {
+  width: 100%;
+}
+
+.slick-slide > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.promo-banner-imgg {
+  
+  
+  
+  width: 45%;
+  height: auto;
+  object-fit: contain;
+  
+  
+  margin: 0 auto;
+
+  border-radius: 12px;
+  margin-bottom: 50px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+}
+.promo-carousel-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.promo-carousel-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.promo-slide {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff; /* o el color que prefieras */
+}
+
+@media (min-width: 640px) {
+  .promo-slide {
+    height: 300px;
+  }
+}
+
+.promo-slide-img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 125px auto 24px;
+  color: #1f2937; /* gris oscuro */
+  position: relative;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+   /* naranja suave o el color de tu marca */
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+.white-text {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.white-text:hover {
+  text-decoration: underline;
+  opacity: 0.9;
 }

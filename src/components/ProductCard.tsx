@@ -418,9 +418,11 @@ if (productImage && cartIcon) {
 
 
   return (
+    
     <div>
-     
+     <h2 className="section-title">Conocé nuestros productos</h2>
       <div className="products-page" >
+        
         <aside className="sidebar">
           <h2>Categorías</h2>
           
@@ -576,6 +578,9 @@ if (productImage && cartIcon) {
     </button>
   ))}
 </div>
+
+
+  
 
       {showLoginModal && (
   <div className="modal-overlay">

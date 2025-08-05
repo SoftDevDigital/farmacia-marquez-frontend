@@ -3,7 +3,8 @@ import '../styles/globals.css';
 import { CartProvider } from '@/context/CartContext';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
-
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

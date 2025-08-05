@@ -4,6 +4,8 @@ import Link from 'next/link';
 import jwt_decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useCart } from '@/context/CartContext';
+import Slider from 'react-slick';
+
 
 const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,6 +17,11 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   const { cartCount, fetchCartCount } = useCart();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+ const [promoMessageIndex, setPromoMessageIndex] = useState(0);
+ const promoMessages = [
+  <span className="text-[#e94c1f]">dale ❤️ a <span className="text-white font-bold">@marquez.city</span></span>,
+  <span className="text-[#e94c1f] text-2xl font-semibold">Descuentos todos los días</span>,
+];
 
   useEffect(() => {
     const token = localStorage.getItem('USER_TOKEN');
@@ -35,6 +42,8 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
       setIsAuthenticated(false);
     }
   }, []);
+
+  
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -79,20 +88,45 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
 
   return (
     <>
-      <header className="w-full px-4 py-2 bg-white shadow-md">
-        <div className="flex justify-between items-center">
-       
-      
-          <nav className="hidden md:flex gap-4">
-            {/* aquí irían tus enlaces normales */}
-          </nav>
+
+{router.pathname === '/' && (
+  <div className="promo-banner">
+    <div className="promo-slider">
+      <Slider
+        dots={false}
+        infinite={true}
+        speed={500}
+        slidesToShow={1}
+        slidesToScroll={1}
+        arrows={true}
+        autoplay={true}
+        autoplaySpeed={3000}
+      >
+        <div className="promo-text">
+  Dale ❤️ a{" "}
+  <a
+    href="https://www.instagram.com/marquez.city/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="white-text"
+  >
+    @marquez.city
+  </a>
+</div>
+        <div>
+          <div className="promo-text">
+            Descuentos todos los días
+          </div>
         </div>
-        {isMobileMenuOpen && (
-          <nav className="flex flex-col mt-2 md:hidden gap-2">
-            {/* aquí irían los mismos enlaces que en el nav normal */}
-          </nav>
-        )}
-      </header>
+        <div>
+          <div className="promo-text">
+            Bienvenidos a Farmacia Marquez City
+          </div>
+        </div>
+      </Slider>
+    </div>
+  </div>
+)}
 
       <header className="header">
         <div className="header-top">
@@ -146,6 +180,8 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
             </div>
           )}
 
+          
+
           <div className="user-options">
             {isAuthenticated ? (
               <>
@@ -174,6 +210,8 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
           </div>
         </div>
 
+       
+
         <nav className="header-nav">
           <ul className="nav-list">
             <li><Link href="/">Inicio</Link></li>
@@ -185,6 +223,103 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
           </ul>
         </nav>
       </header>
+      {router.pathname === '/' && (
+  <section className="promo-image-banner">
+    <img
+      src="/farmacia_marquezcity.jpg"
+      alt="Promoción especial"
+      className="promo-banner-img"
+    />
+  </section>
+)}
+
+{router.pathname === '/' && (
+  <section className="benefits-section">
+    <div className="benefits-container">
+      <div className="benefit-box">
+        <img src="/marquezcity_envios.jpg" alt="Envíos" className="benefit-icon" />
+        <div>
+          <h4>Envíos</h4>
+          <p>Gratis a partir de los $80.000</p>
+        </div>
+      </div>
+      <div className="benefit-box">
+        <img src="/marquezcity_paga.jpg" alt="Pagá" className="benefit-icon" />
+        <div>
+          <h4>Pagá</h4>
+          <p>En 3 sin interés</p>
+        </div>
+      </div>
+      <div className="benefit-box">
+        <img src="/marquezcity_retira.jpg" alt="Retirá" className="benefit-icon" />
+        <div>
+          <h4>Retirá</h4>
+          <p>Gratis en nuestro local</p>
+        </div>
+      </div>
+      <a
+  href="https://wa.me/3424058477"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="benefit-box"
+>
+  <img src="/marquezcity_wpp.jpg" alt="Asesoramiento Online" className="benefit-icon" />
+  <div>
+    <h4>Asesoramiento Online</h4>
+    <p>Vía WhatsApp</p>
+  </div>
+</a>
+    </div>
+  </section>
+)}
+{router.pathname === '/' && (
+  <section className="promo-image-banner">
+    <Link href="/PromotionsPage" passHref legacyBehavior>
+      <a>
+        <img
+          src="/marquezcity_promociones.jpg"
+          alt="Promociones Farmacia Marquez City"
+          className="promo-banner-img hover:opacity-90 transition-opacity duration-300"
+        />
+      </a>
+    </Link>
+  </section>
+)}
+  {router.pathname === '/' && (
+  <section className="promo-carousel-wrapper">
+    <div className="promo-carousel-container">
+      <Slider
+        dots={true}
+        infinite={true}
+        speed={200}
+        slidesToShow={1}
+        slidesToScroll={1}
+        arrows={true}
+        autoplay={true}
+        autoplaySpeed={900}
+      >
+        {[
+          'farmacia-marquezcity-carrusel-08-.png',
+          'farmacia-marquezcity-carrusel-09.png',
+          'farmacia-marquezcity-carrusel-10.png',
+          'farmacia-marquezcity-carrusel-11.png',
+          'farmacia-marquezcity-carrusel-12.png',
+        ].map((filename, index) => (
+          <div key={index} className="promo-slide">
+            <img
+              src={`/${filename}`}
+              alt={`Banner ${index + 1}`}
+              className="promo-slide-img"
+            />
+          </div>
+        ))}
+      </Slider>
+    </div>
+  </section>
+)}
+
+
+
     </>
   );
 };
