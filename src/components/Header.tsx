@@ -237,38 +237,22 @@ const Header = ({ onSearch }: { onSearch: (term: string) => void }) => {
   <section className="benefits-section">
     <div className="benefits-container">
       <div className="benefit-box">
-        <img src="/marquezcity_envios.jpg" alt="Envíos" className="benefit-icon" />
-        <div>
-          <h4>Envíos</h4>
-          <p>Gratis a partir de los $80.000</p>
-        </div>
+        <img src="/marquezcity_envios.jpg" alt="Envíos" className="benefit-icon-full" />
       </div>
       <div className="benefit-box">
-        <img src="/marquezcity_paga.jpg" alt="Pagá" className="benefit-icon" />
-        <div>
-          <h4>Pagá</h4>
-          <p>En 3 sin interés</p>
-        </div>
+        <img src="/marquezcity_paga.jpg" alt="Pagá" className="benefit-icon-full" />
       </div>
       <div className="benefit-box">
-        <img src="/marquezcity_retira.jpg" alt="Retirá" className="benefit-icon" />
-        <div>
-          <h4>Retirá</h4>
-          <p>Gratis en nuestro local</p>
-        </div>
+        <img src="/marquezcity_retira.jpg" alt="Retirá" className="benefit-icon-full" />
       </div>
       <a
-  href="https://wa.me/3424058477"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="benefit-box"
->
-  <img src="/marquezcity_wpp.jpg" alt="Asesoramiento Online" className="benefit-icon" />
-  <div>
-    <h4>Asesoramiento Online</h4>
-    <p>Vía WhatsApp</p>
-  </div>
-</a>
+        href="https://wa.me/3424058477"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="benefit-box"
+      >
+        <img src="/marquezcity_wpp.jpg" alt="Asesoramiento Online" className="benefit-icon-full" />
+      </a>
     </div>
   </section>
 )}
